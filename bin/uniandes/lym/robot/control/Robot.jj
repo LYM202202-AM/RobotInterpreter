@@ -1,0 +1,545 @@
+/*
+Gramatica para el Robot:
+Autor: Alejandro Arango
+Modificado por: Silvia Takahashi
+Modificado por: Juan Pablo Morales.
+Agregadas producciones para manejar globos
+Modificado por Silvia Takahashi
+
+
+
+ **/
+
+
+options 
+{
+  
+	LOOKAHEAD=1; 
+	IGNORE_CASE=true;
+	STATIC = false;
+	
+}
+   
+
+PARSER_BEGIN(Robot)
+
+package uniandes.lym.robot.control;
+
+import uniandes.lym.robot.kernel.*;
+import uniandes.lym.robot.view.Console;
+ 
+import java.awt.Point;
+import java.io.*;
+import java.util.Vector;
+import java.util.LinkedList;
+
+@SuppressWarnings("serial")
+public class Robot 
+{
+
+ 	static ArrayList<String > varNames = new ArrayList<String>();
+  	static ArrayList<String > procNames = new ArrayList<String>();
+  	static HashMap<String, Integer> procParams = new HashMap<String, Integer>();
+  	static HashMap<String, Integer > globalScope = new HashMap<String, Integer>();
+	private RobotWorldDec world;
+	
+	
+	void setWorld(RobotWorld w) {
+		world = (RobotWorldDec) w;	
+	}
+
+	String salida=new String();
+}
+PARSER_END(Robot)
+
+SKIP:
+{
+		" "
+	|	"\r"
+	|	"\t"
+	| 	"\n"
+}
+/*
+TOKEN:
+{
+			< MOV:  "Mov" >
+		| 	< RIGHT: "RIGHT" >
+		| 	< PUT: "Put" >
+		| 	< PICK: "Pick" >
+		|  	< POP: "Pop" >
+		| 	< GO: "GO" >
+        |  	< HOP:  "HOP" >		
+
+}*/
+
+TOKEN: /*Comandos*/
+{
+
+  	< WALK: "walk" >
+| 	< JUMP: "jump" >
+| 	< JUMPTO: "jumpTo" >
+| 	< VEER: "veer" >
+| 	< LOOK: "look" >
+| 	< DROP: "drop" >
+|	< GRAB: "grab" >
+| 	< GET: "get" >
+| 	< FREE: "free" >
+| 	< POP: "pop" >
+}
+
+TOKEN: /*Directions */
+{
+  < AROUND: "around" >
+| < LEFT: "left" >
+| < RIGHT: "right" >
+}
+
+TOKEN: /*Orientations */
+{
+  < NORTH: "north" >
+| < SOUTH: "south" >
+| < EAST: "east" >
+| < WEST: "west" >
+}
+
+TOKEN:/*Walks */
+{
+  < FRONT: "front" >
+| < BACK: "back" >
+}
+
+
+TOKEN: /* Condiciones */
+{
+	< ISFACING: "isfacing" >
+|	< ISVALID: "isValid"  >
+|	< CANWALK: "canWalk"  >
+|	< NOT: "not"  >	
+}
+
+TOKEN: /*LOGIC */
+{
+		< PROG: "PROG" >
+	| 	< GORP: "GORP" >
+	| 	< PROC: "PROC" >
+	|   < CORP: "CORP" >
+	|  	< VAR: "VAR" >
+}
+
+TOKEN:/*Control structures */
+{
+  < IF: "if" >
+| < ELSE: "else" >
+| < WHILE: "while" >
+| < FI: "fi" >
+| < DO: "do" >
+| < OD: "od" >
+| < REPEAT: "repeatTimes" >
+| < PER: "per" >
+| < PICK: "pick" >
+}
+
+TOKEN :
+{
+    < CONSTANT : (< DIGIT >)+ >
+|	< WORD: (< LMINUS > | < LMAYUS >)(< LMINUS > | < LMAYUS > | < DIGIT >)* >
+|   < #DIGIT : [ "0"-"9" ] >
+|   < #LMINUS : ["a"-"z"] >
+|   < #LMAYUS : ["A"-"Z"] >
+}
+
+
+TOKEN:
+{
+	< ASSIGNMENT : ":=" >
+|	< PI : "(" >
+|	< PD : ")" >
+|	< CBL : "{" >
+|	< CBR : "}" >
+|	< SC : ";" >
+|	< CM : "," >
+}
+
+
+void program():
+{
+  ArrayList<String> localScope = new ArrayList<String>();
+}
+{
+	< PROG > (varDef())? (procDef())* insBlock(localScope) < GORP >
+}
+
+void varDef():
+{
+  
+}
+{
+	< VAR > saveGlobalNamesxType("VAR")( < CM > saveGlobalNamesxType("VAR"))* < SC >
+}
+
+Token saveGlobalNamesxType(String type):
+{
+  Token t;
+}
+{
+	t = < WORD >
+	{
+	 	if (type == "VAR"){ 
+	  		varNames.add(t.image);
+	 	} else if (type == "PROC"){
+	 	  	procNames.add(t.image);
+        procParams.put(t.image, 0);
+	 	}
+	 	return t;
+	}
+}
+
+void saveLocalNamesxType(ArrayList <String > localScope, String procN): /*Arreglar*/
+{
+  Token t;
+}
+{
+	t = < WORD >
+	{
+		localScope.add(t.image);
+    procParams.put(procN, procParams.get(procN) + 1);
+	}
+}
+
+void procDef():
+{
+	ArrayList <String > localScope = new ArrayList<String>();
+	Token scope;
+}
+{
+	< PROC > scope=saveGlobalNamesxType("PROC") < PI > (saveLocalNamesxType(localScope, scope.image) (< CM > saveLocalNamesxType(localScope, scope.image))*)? < PD >
+	insBlock(localScope) < CORP >
+	{
+	  System.out.println(scope.image);
+	  System.out.println(localScope);
+	}
+}
+
+void insBlock(ArrayList <String> localScope):
+{
+
+}
+{
+  < CBL > globalCommand(localScope) < CBR >
+}
+
+void rules(ArrayList <String> localScope):
+{
+  Token t;
+  Token p;
+  ArrayList <String> params = new ArrayList<String>();
+}
+{
+  t= < WORD > < PI > (p=parameter(localScope, true)
+  {
+    params.add(p.image);
+  }
+  (< CM > p=parameter(localScope, true)
+  {
+    params.add(p.image);
+  })* )? < PD >
+  {
+    if (procNames.contains(t.image)){
+      if (procParams.get(t.image) == params.size()){
+        System.out.println("Correcto");
+      } else {
+        System.out.println("Incorrecto, cantidad de parametros");
+      }
+    } else {
+      System.out.println("Incorrecto, no existe el procedimiento");
+    }
+  }
+}
+
+void globalCommand(ArrayList <String > localScope):
+{
+}
+{
+	command(localScope) (< SC > command(localScope))*
+}
+
+void command(ArrayList <String > localScope):
+{
+}
+{
+  (
+  posibleCommands(localScope)
+  | jumpTo(localScope)
+  | veer()
+  | look()
+  | walk(localScope)
+  |
+  (
+  LOOKAHEAD(2)
+  assignment(localScope)
+  | rules(localScope)
+  )
+  | ifBlock(localScope)
+  | whileBlock(localScope)
+  | repeatBlock(localScope)
+  )
+}
+
+void posibleCommands(ArrayList <String > localScope):
+{
+}
+{
+  (
+    < DROP > | < GRAB > | < GET > | < FREE > | < POP >
+  )
+  < PI > parameter(localScope, true) < PD >
+}
+
+
+Token parameter(ArrayList <String > localScope, boolean allowInt):
+{
+  Token t;
+  Token d;
+}
+{
+  t = < WORD >
+  {
+    if (localScope.contains(t.image) || varNames.contains(t.image) || globalScope.containsKey(t.image)){
+      // System.out.println("OK");
+      // System.out.println(t.image);
+      return t;
+    } else {
+      System.out.println("NOK");
+      System.out.println(t.image);
+    }
+  }
+  | d = < CONSTANT >
+  {
+    if (allowInt){
+      // System.out.println("OK");
+      // System.out.println(d.image);
+      return d;
+    } else {
+      System.out.println("NOK");
+      System.out.println(d.image);
+    }
+  }
+}
+
+
+void jumpTo(ArrayList <String > localScope):
+{
+  Token t;
+}
+{
+  < JUMPTO > < PI > parameter(localScope, true) < CM > parameter(localScope, true) < PD >
+}
+
+void posibleDirections():
+{}
+{
+  < AROUND > | < LEFT > | < RIGHT >
+}
+
+void posibleOrientations():
+{}
+{
+  < NORTH > | < SOUTH > | < EAST > | < WEST >
+}
+
+void posibleWalks():
+{}
+{
+  < FRONT > | < BACK > | < LEFT > | < RIGHT >
+}
+
+void veer():
+{}
+{
+  < VEER > < PI > posibleDirections() < PD >
+}
+
+void look():
+{}
+{
+  < LOOK > < PI > posibleOrientations() < PD >
+}
+
+void walk(ArrayList <String > localScope):
+{}
+{
+  < WALK > < PI > walksTypes(localScope) < PD >
+}
+
+void walksTypes(ArrayList <String > localScope):
+{}
+{
+  parameter(localScope, true)
+  | posibleWalks() < CM > parameter(localScope, true)
+  | posibleOrientations() < CM > parameter(localScope, true)
+}
+
+void assignment(ArrayList <String > localScope):
+{
+  Token t;
+  Token n;
+}
+{
+  t=parameter(localScope, false) < ASSIGNMENT > n=< CONSTANT >
+  {
+    globalScope.put(t.image, Integer.parseInt(n.image));
+  }
+}
+
+void terminalBlock(ArrayList <String > localScope):
+{}
+{
+  < CBL > globalCommand(localScope) < CBR >
+}
+
+void validList():
+{}
+{
+  < WALK >
+  | < JUMP >
+  | < GRAB >
+  | < DROP >
+  | < PICK >
+  | < FREE >
+  | < POP >
+}
+
+void isFacing():
+{}
+{
+  < ISFACING > < PI > posibleOrientations() < PD >
+}
+
+void isValid(ArrayList <String > localScope):
+{}
+{
+  < ISVALID > < PI > validList() < CM > parameter(localScope, true) < PD >
+}
+
+void canWalk(ArrayList <String > localScope):
+{}
+{
+  < CANWALK > < PI > (posibleOrientations()| posibleWalks()) < CM > parameter(localScope, true) < PD >
+}
+
+void condition(ArrayList <String > localScope):
+{}
+{
+  isFacing()
+  | isValid(localScope)
+  | canWalk(localScope)
+}
+
+void not(ArrayList <String > localScope):
+{}
+{
+  < NOT > < PI > condition(localScope) < PD >
+}
+
+void ifBlock(ArrayList <String > localScope):
+{}
+{
+  < IF > < PI > (not(localScope) | condition(localScope)) < PD > terminalBlock(localScope) ( < ELSE > terminalBlock(localScope) )? < FI >
+}
+
+void whileBlock(ArrayList <String> localScope):
+{}
+{
+  < WHILE > < PI > ( not(localScope) | condition(localScope)) < PD > < DO > terminalBlock(localScope) < OD >
+}
+
+void repeatBlock(ArrayList <String> localScope):
+{}
+{
+  < REPEAT > parameter(localScope, true) terminalBlock(localScope) < PER >
+}
+
+//	//boolean command(uniandes.lym.robot.view.Console sistema) :
+//	boolean command(Console sistema):
+//	{	
+//		
+//		int x,y;
+//		salida=new String();	
+//	}
+//
+//	
+//	{
+//		(
+//		  (
+//		   <RIGHT> "(" ")" {world.turnRight();salida = "Command: Turnright";}
+//		| 	<MOV>  "(" x=num() ")" {world.moveForward(x,false);salida = "Command: Moveforward ";}  
+//		| 	<HOP>  "(" x=num() ")" {world.moveForward(x,true);salida = "Command:Jumpforward ";}
+//		| 	<GO>  "(" x=num() "," y=num()")" {world.setPostion(x,y);salida = "Command:GO ";}  
+//		|  <PUT> "("  put() ")"					  			
+//		|  <PICK> "(" get()  ")"	
+//	    |  < POP > "(" x=num() ")" {world.popBalloons(x); salida = "Comando:  Pop";}
+//		) ";" 
+//
+//		{
+//		    try {
+//	    			 Thread.sleep(900);
+//	    	    } catch (InterruptedException e) {
+//	    			        System.err.format("IOException: %s%n", e);
+//	    		    }
+//	    			 
+//			sistema.printOutput(salida);
+//			return true;
+//		})+
+//
+//    	| <EOF> {return false;} 
+//	}
+//
+//	void put() :
+//	{
+//		int f=1;	
+//	}
+//	{
+//		( <CHIPS>    "," f=num() {world.putChips(f); salida = "Command:  Put Chips"; })
+//		|  	  ( <BALLOONS>   "," f=num() {world.putBalloons(f); salida = "Command:  Put Balloons";})	 
+//
+//	}
+//
+//	void get() :
+//	{
+//		int f=1;	
+//	}
+//	{
+//		( <CHIPS>   "," f=num() {world.pickChips(f);salida = "Command:  Pick chips";})
+//		|  	  ( <BALLOONS>   "," f=num() {world.grabBalloons(f);salida="Command:  Pick balloons";})	 
+//
+//	}
+//
+//	
+//	
+//
+//	/**
+//	 * Unsigned decimal number
+//	 * @return the corresponding value of the string
+//	 * @error  corresponding value is too large
+//	 */
+//
+//	int num() throws Error:
+//	{	
+//		int total=1;
+//	}
+//	{
+//		<NUM>
+//		{
+//			try 
+//			{
+//				total = Integer.parseInt(token.image);
+//			} 
+//			catch (NumberFormatException ee) 
+//			{
+//				throw new Error("Number out of bounds: "+token.image+" !!");
+//			}
+//			return total;
+//		}
+//	}
+
+	
