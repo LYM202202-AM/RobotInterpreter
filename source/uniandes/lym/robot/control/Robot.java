@@ -178,7 +178,9 @@ public class Robot implements RobotConstants {
 
   final public void globalCommand(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
   ArrayList<String> commands = new ArrayList<String>();
-    command(localScope, scope, execute);
+  String s;
+    s = command(localScope, scope, execute);
+    commands.add(s);
     label_5:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -190,39 +192,42 @@ public class Robot implements RobotConstants {
         break label_5;
       }
       jj_consume_token(SC);
-      command(localScope, scope ,execute);
+      s = command(localScope, scope ,execute);
+    commands.add(s);
     }
+    procCommands.put(scope.image, commands);
   }
 
-  final public void command(ArrayList <String > localScope, Token scope ,boolean execute) throws ParseException {
+  final public String command(ArrayList <String > localScope, Token scope ,boolean execute) throws ParseException {
+  String s;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case DROP:
     case GRAB:
     case GET:
     case FREE:
     case POP:
-      posibleCommands(localScope, scope, execute);
+      s = posibleCommands(localScope, scope, execute);
       break;
     case JUMPTO:
-      jumpTo(localScope, scope, execute);
+      s = jumpTo(localScope, scope, execute);
       break;
     case VEER:
-      veer();
+      s = veer();
       break;
     case LOOK:
-      look();
+      s = look();
       break;
     case WALK:
-      walk(localScope, scope, execute);
+      s = walk(localScope, scope, execute);
       break;
     case CONSTANT:
     case WORD:
       if (jj_2_1(2)) {
-        assignment(localScope, scope, execute);
+        s = assignment(localScope, scope, execute);
       } else {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case WORD:
-          rules(localScope, scope, execute);
+          s = rules(localScope, scope, execute);
           break;
         default:
           jj_la1[8] = jj_gen;
@@ -232,37 +237,40 @@ public class Robot implements RobotConstants {
       }
       break;
     case IF:
-      ifBlock(localScope, scope, execute);
+      s = ifBlock(localScope, scope, execute);
       break;
     case WHILE:
-      whileBlock(localScope, scope, execute);
+      s = whileBlock(localScope, scope, execute);
       break;
     case REPEAT:
-      repeatBlock(localScope, scope, execute);
+      s = repeatBlock(localScope, scope, execute);
       break;
     default:
       jj_la1[9] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
+    {if (true) return s;}
+    throw new Error("Missing return statement in function");
   }
 
-  final public void posibleCommands(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
+  final public String posibleCommands(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
+  Token t;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case DROP:
-      jj_consume_token(DROP);
+      t = jj_consume_token(DROP);
       break;
     case GRAB:
-      jj_consume_token(GRAB);
+      t = jj_consume_token(GRAB);
       break;
     case GET:
-      jj_consume_token(GET);
+      t = jj_consume_token(GET);
       break;
     case FREE:
-      jj_consume_token(FREE);
+      t = jj_consume_token(FREE);
       break;
     case POP:
-      jj_consume_token(POP);
+      t = jj_consume_token(POP);
       break;
     default:
       jj_la1[10] = jj_gen;
@@ -272,6 +280,8 @@ public class Robot implements RobotConstants {
     jj_consume_token(PI);
     parameter(localScope, true);
     jj_consume_token(PD);
+    {if (true) return t.image;}
+    throw new Error("Missing return statement in function");
   }
 
   final public Token parameter(ArrayList <String > localScope, boolean allowInt) throws ParseException {
@@ -608,22 +618,6 @@ public class Robot implements RobotConstants {
     finally { jj_save(0, xla); }
   }
 
-  private boolean jj_3R_6() {
-    if (jj_3R_7()) return true;
-    if (jj_scan_token(ASSIGNMENT)) return true;
-    return false;
-  }
-
-  private boolean jj_3_1() {
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_9() {
-    if (jj_scan_token(CONSTANT)) return true;
-    return false;
-  }
-
   private boolean jj_3R_8() {
     if (jj_scan_token(WORD)) return true;
     return false;
@@ -636,6 +630,22 @@ public class Robot implements RobotConstants {
     jj_scanpos = xsp;
     if (jj_3R_9()) return true;
     }
+    return false;
+  }
+
+  private boolean jj_3_1() {
+    if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_6() {
+    if (jj_3R_7()) return true;
+    if (jj_scan_token(ASSIGNMENT)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_9() {
+    if (jj_scan_token(CONSTANT)) return true;
     return false;
   }
 

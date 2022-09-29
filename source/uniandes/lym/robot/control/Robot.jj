@@ -231,7 +231,7 @@ void insBlock(ArrayList <String> localScope, Token scope, boolean execute):
   < CBL > globalCommand(localScope, scope, execute) < CBR >
 }
 
-void rules(ArrayList <String> localScope, Token scope, boolean execute):
+String rules(ArrayList <String> localScope, Token scope, boolean execute):
 {
   Token t;
   Token p;
@@ -256,47 +256,64 @@ void rules(ArrayList <String> localScope, Token scope, boolean execute):
     } else {
       System.out.println("Incorrecto, no existe el procedimiento");
     }
+    return t.image;
   }
 }
 
 void globalCommand(ArrayList <String > localScope, Token scope, boolean execute):
 {
   ArrayList<String> commands = new ArrayList<String>();
+  String s;
 }
 {
-	command(localScope, scope, execute) (< SC > command(localScope, scope ,execute))*
+	s=command(localScope, scope, execute){
+    commands.add(s);
+  }(< SC > s=command(localScope, scope ,execute){
+    commands.add(s);
+  })*
+  {
+    procCommands.put(scope.image, commands);
+  }
 }
 
-void command(ArrayList <String > localScope, Token scope ,boolean execute):
+String command(ArrayList <String > localScope, Token scope ,boolean execute):
 {
+  String s;
 }
 {
   (
-  posibleCommands(localScope, scope, execute)
-  | jumpTo(localScope, scope, execute)
-  | veer()
-  | look()
-  | walk(localScope, scope, execute)
+  s=posibleCommands(localScope, scope, execute)
+  | s=jumpTo(localScope, scope, execute)
+  | s=veer()
+  | s=look()
+  | s=walk(localScope, scope, execute)
   |
   (
   LOOKAHEAD(2)
-  assignment(localScope, scope, execute)
-  | rules(localScope, scope, execute)
+  s=assignment(localScope, scope, execute)
+  | s=rules(localScope, scope, execute)
   )
-  | ifBlock(localScope, scope, execute)
-  | whileBlock(localScope, scope, execute)
-  | repeatBlock(localScope, scope, execute)
+  | s=ifBlock(localScope, scope, execute)
+  | s=whileBlock(localScope, scope, execute)
+  | s=repeatBlock(localScope, scope, execute)
   )
+  {
+    return s;
+  }
 }
 
-void posibleCommands(ArrayList <String > localScope, Token scope, boolean execute):
+String posibleCommands(ArrayList <String > localScope, Token scope, boolean execute):
 {
+  Token t;
 }
 {
   (
-    < DROP > | < GRAB > | < GET > | < FREE > | < POP >
+    t=< DROP > | t=< GRAB > | t=< GET > | t=< FREE > | t=< POP >
   )
   < PI > parameter(localScope, true) < PD >
+  {
+    return t.image;
+  }
 }
 
 
@@ -331,12 +348,15 @@ Token parameter(ArrayList <String > localScope, boolean allowInt):
 }
 
 
-void jumpTo(ArrayList <String > localScope, Token scope, boolean execute):
+String jumpTo(ArrayList <String > localScope, Token scope, boolean execute):
 {
   Token t;
 }
 {
-  < JUMPTO > < PI > parameter(localScope, true) < CM > parameter(localScope, true) < PD >
+  t=< JUMPTO > < PI > parameter(localScope, true) < CM > parameter(localScope, true) < PD >
+  {
+    return t.image;
+  }
 }
 
 void posibleDirections():
@@ -357,23 +377,40 @@ void posibleWalks():
   < FRONT > | < BACK > | < LEFT > | < RIGHT >
 }
 
-void veer():
-{}
+String veer():
 {
-  < VEER > < PI > posibleDirections() < PD >
+  Token t;
+}
+{
+  t=< VEER > < PI > posibleDirections() < PD >
+  {
+    return t.image;
+  }
 }
 
-void look():
-{}
+// look with return of String
+String look():
 {
-  < LOOK > < PI > posibleOrientations() < PD >
+  Token t;
+}
+{
+  t=< LOOK > < PI > posibleOrientations() < PD >
+  {
+    return t.image;
+  }
 }
 
-void walk(ArrayList <String > localScope, Token scope, boolean execute):
-{}
+String walk(ArrayList <String > localScope, Token scope, boolean execute):
 {
-  < WALK > < PI > walksTypes(localScope, scope, execute) < PD >
+  Token t;
 }
+{
+  t=< WALK > < PI > walksTypes(localScope, scope, execute) < PD >
+  {
+    return t.image;
+  }
+}
+
 
 void walksTypes(ArrayList <String > localScope, Token scope, boolean execute):
 {}
@@ -383,7 +420,7 @@ void walksTypes(ArrayList <String > localScope, Token scope, boolean execute):
   | posibleOrientations() < CM > parameter(localScope, true)
 }
 
-void assignment(ArrayList <String > localScope, Token scope, boolean execute):
+String assignment(ArrayList <String > localScope, Token scope, boolean execute):
 {
   Token t;
   Token n;
@@ -392,6 +429,7 @@ void assignment(ArrayList <String > localScope, Token scope, boolean execute):
   t=parameter(localScope, false) < ASSIGNMENT > n=< CONSTANT >
   {
     globalScope.put(t.image, Integer.parseInt(n.image));
+    return t.image;
   }
 }
 
@@ -445,22 +483,38 @@ void not(ArrayList <String > localScope, Token scope, boolean execute):
   < NOT > < PI > condition(localScope, scope, execute) < PD >
 }
 
-void ifBlock(ArrayList <String > localScope, Token scope, boolean execute):
-{}
+String ifBlock(ArrayList <String > localScope, Token scope, boolean execute):
 {
-  < IF > < PI > (not(localScope, scope, execute) | condition(localScope, scope, execute)) < PD > terminalBlock(localScope, scope, execute) ( < ELSE > terminalBlock(localScope, scope, execute) )? < FI >
+  Token t;
+}
+{
+  t=< IF > < PI > (not(localScope, scope, execute) | condition(localScope, scope, execute)) < PD > terminalBlock(localScope, scope, execute) ( < ELSE > terminalBlock(localScope, scope, execute) )? < FI >
+
+  {
+    return t.image;
+  }
 }
 
-void whileBlock(ArrayList <String> localScope, Token scope, boolean execute):
-{}
+String whileBlock(ArrayList <String> localScope, Token scope, boolean execute):
 {
-  < WHILE > < PI > ( not(localScope, scope, execute) | condition(localScope, scope, execute)) < PD > < DO > terminalBlock(localScope, scope, execute) < OD >
+  Token t;
+}
+{
+  t=< WHILE > < PI > ( not(localScope, scope, execute) | condition(localScope, scope, execute)) < PD > < DO > terminalBlock(localScope, scope, execute) < OD >
+  {
+    return t.image;
+  }
 }
 
-void repeatBlock(ArrayList <String> localScope, Token scope, boolean execute):
-{}
+String repeatBlock(ArrayList <String> localScope, Token scope, boolean execute):
 {
-  < REPEAT > parameter(localScope, true) terminalBlock(localScope, scope, execute) < PER >
+  Token t;
+}
+{
+  t=< REPEAT > parameter(localScope, true) terminalBlock(localScope, scope, execute) < PER >
+  {
+    return t.image;
+  }
 }
 //	//boolean command(uniandes.lym.robot.view.Console sistema) :
 //	boolean command(Console sistema):
