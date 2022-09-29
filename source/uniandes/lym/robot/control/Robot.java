@@ -14,8 +14,9 @@ public class Robot implements RobotConstants {
 
         static ArrayList<String > varNames = new ArrayList<String>();
         static ArrayList<String > procNames = new ArrayList<String>();
-        static HashMap<String, Integer> procParams = new HashMap<String, Integer>();
+        static HashMap<String, ArrayList<String>> procParams = new HashMap<String, ArrayList<String>>();
         static HashMap<String, Integer > globalScope = new HashMap<String, Integer>();
+        static HashMap<String, ArrayList<String> > procScope = new HashMap<String, ArrayList<String> >();
         private RobotWorldDec world;
 
 
@@ -78,7 +79,7 @@ public class Robot implements RobotConstants {
                         varNames.add(t.image);
                 } else if (type == "PROC"){
                         procNames.add(t.image);
-        procParams.put(t.image, 0);
+        procParams.put(t.image, new ArrayList<String>());
                 }
                 {if (true) return t;}
     throw new Error("Missing return statement in function");
@@ -88,7 +89,7 @@ public class Robot implements RobotConstants {
   Token t;
     t = jj_consume_token(WORD);
                 localScope.add(t.image);
-    procParams.put(procN, procParams.get(procN) + 1);
+    procParams.get(procN).add(t.image);
   }
 
   final public void procDef() throws ParseException {
@@ -163,7 +164,7 @@ public class Robot implements RobotConstants {
     }
     jj_consume_token(PD);
     if (procNames.contains(t.image)){
-      if (procParams.get(t.image) == params.size()){
+      if (procParams.get(t.image).size() == params.size()){
         System.out.println("Correcto");
       } else {
         System.out.println("Incorrecto, cantidad de parametros");

@@ -39,8 +39,9 @@ public class Robot
 
  	static ArrayList<String > varNames = new ArrayList<String>();
   	static ArrayList<String > procNames = new ArrayList<String>();
-  	static HashMap<String, Integer> procParams = new HashMap<String, Integer>();
-  	static HashMap<String, Integer > globalScope = new HashMap<String, Integer>();
+	static HashMap<String, ArrayList<String>> procParams = new HashMap<String, ArrayList<String>>();
+ 	static HashMap<String, Integer > globalScope = new HashMap<String, Integer>();
+  	static HashMap<String, ArrayList<String> > procScope = new HashMap<String, ArrayList<String> >();
 	private RobotWorldDec world;
 	
 	
@@ -188,7 +189,7 @@ Token saveGlobalNamesxType(String type):
 	  		varNames.add(t.image);
 	 	} else if (type == "PROC"){
 	 	  	procNames.add(t.image);
-        procParams.put(t.image, 0);
+        procParams.put(t.image, new ArrayList<String>());
 	 	}
 	 	return t;
 	}
@@ -202,7 +203,8 @@ void saveLocalNamesxType(ArrayList <String > localScope, String procN): /*Arregl
 	t = < WORD >
 	{
 		localScope.add(t.image);
-    procParams.put(procN, procParams.get(procN) + 1);
+    procParams.get(procN).add(t.image);
+
 	}
 }
 
@@ -245,7 +247,7 @@ void rules(ArrayList <String> localScope):
   })* )? < PD >
   {
     if (procNames.contains(t.image)){
-      if (procParams.get(t.image) == params.size()){
+      if (procParams.get(t.image).size() == params.size()){
         System.out.println("Correcto");
       } else {
         System.out.println("Incorrecto, cantidad de parametros");
