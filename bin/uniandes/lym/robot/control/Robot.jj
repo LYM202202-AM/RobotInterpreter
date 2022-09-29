@@ -41,7 +41,7 @@ public class Robot
   	static ArrayList<String > procNames = new ArrayList<String>();
 	static HashMap<String, ArrayList<String>> procParams = new HashMap<String, ArrayList<String>>();
  	static HashMap<String, Integer > globalScope = new HashMap<String, Integer>();
-  	static HashMap<String, ArrayList<String> > procScope = new HashMap<String, ArrayList<String> >();
+  	static HashMap<String, ArrayList<String> > procCommands = new HashMap<String, ArrayList<String> >();
 	private RobotWorldDec world;
 	
 	
@@ -165,9 +165,10 @@ TOKEN:
 void program():
 {
   ArrayList<String> localScope = new ArrayList<String>();
+  Token t;
 }
 {
-	< PROG > (varDef())? (procDef())* insBlock(localScope) < GORP >
+	t=< PROG > (varDef())? (procDef())* insBlock(localScope, t, false) < GORP >
 }
 
 void varDef():
@@ -212,25 +213,25 @@ void procDef():
 {
 	ArrayList <String > localScope = new ArrayList<String>();
 	Token scope;
+  boolean execute = false;
 }
 {
 	< PROC > scope=saveGlobalNamesxType("PROC") < PI > (saveLocalNamesxType(localScope, scope.image) (< CM > saveLocalNamesxType(localScope, scope.image))*)? < PD >
-	insBlock(localScope) < CORP >
+	insBlock(localScope, scope, execute) < CORP >
 	{
 	  System.out.println(scope.image);
 	  System.out.println(localScope);
 	}
 }
 
-void insBlock(ArrayList <String> localScope):
+void insBlock(ArrayList <String> localScope, Token scope, boolean execute):
 {
-
 }
 {
-  < CBL > globalCommand(localScope) < CBR >
+  < CBL > globalCommand(localScope, scope, execute) < CBR >
 }
 
-void rules(ArrayList <String> localScope):
+void rules(ArrayList <String> localScope, Token scope, boolean execute):
 {
   Token t;
   Token p;
@@ -258,36 +259,37 @@ void rules(ArrayList <String> localScope):
   }
 }
 
-void globalCommand(ArrayList <String > localScope):
+void globalCommand(ArrayList <String > localScope, Token scope, boolean execute):
 {
+  ArrayList<String> commands = new ArrayList<String>();
 }
 {
-	command(localScope) (< SC > command(localScope))*
+	command(localScope, scope, execute) (< SC > command(localScope, scope ,execute))*
 }
 
-void command(ArrayList <String > localScope):
+void command(ArrayList <String > localScope, Token scope ,boolean execute):
 {
 }
 {
   (
-  posibleCommands(localScope)
-  | jumpTo(localScope)
+  posibleCommands(localScope, scope, execute)
+  | jumpTo(localScope, scope, execute)
   | veer()
   | look()
-  | walk(localScope)
+  | walk(localScope, scope, execute)
   |
   (
   LOOKAHEAD(2)
-  assignment(localScope)
-  | rules(localScope)
+  assignment(localScope, scope, execute)
+  | rules(localScope, scope, execute)
   )
-  | ifBlock(localScope)
-  | whileBlock(localScope)
-  | repeatBlock(localScope)
+  | ifBlock(localScope, scope, execute)
+  | whileBlock(localScope, scope, execute)
+  | repeatBlock(localScope, scope, execute)
   )
 }
 
-void posibleCommands(ArrayList <String > localScope):
+void posibleCommands(ArrayList <String > localScope, Token scope, boolean execute):
 {
 }
 {
@@ -329,7 +331,7 @@ Token parameter(ArrayList <String > localScope, boolean allowInt):
 }
 
 
-void jumpTo(ArrayList <String > localScope):
+void jumpTo(ArrayList <String > localScope, Token scope, boolean execute):
 {
   Token t;
 }
@@ -367,13 +369,13 @@ void look():
   < LOOK > < PI > posibleOrientations() < PD >
 }
 
-void walk(ArrayList <String > localScope):
+void walk(ArrayList <String > localScope, Token scope, boolean execute):
 {}
 {
-  < WALK > < PI > walksTypes(localScope) < PD >
+  < WALK > < PI > walksTypes(localScope, scope, execute) < PD >
 }
 
-void walksTypes(ArrayList <String > localScope):
+void walksTypes(ArrayList <String > localScope, Token scope, boolean execute):
 {}
 {
   parameter(localScope, true)
@@ -381,7 +383,7 @@ void walksTypes(ArrayList <String > localScope):
   | posibleOrientations() < CM > parameter(localScope, true)
 }
 
-void assignment(ArrayList <String > localScope):
+void assignment(ArrayList <String > localScope, Token scope, boolean execute):
 {
   Token t;
   Token n;
@@ -393,10 +395,10 @@ void assignment(ArrayList <String > localScope):
   }
 }
 
-void terminalBlock(ArrayList <String > localScope):
+void terminalBlock(ArrayList <String > localScope, Token scope, boolean execute):
 {}
 {
-  < CBL > globalCommand(localScope) < CBR >
+  < CBL > globalCommand(localScope, scope, execute) < CBR >
 }
 
 void validList():
@@ -417,50 +419,49 @@ void isFacing():
   < ISFACING > < PI > posibleOrientations() < PD >
 }
 
-void isValid(ArrayList <String > localScope):
+void isValid(ArrayList <String > localScope, Token scope, boolean execute):
 {}
 {
   < ISVALID > < PI > validList() < CM > parameter(localScope, true) < PD >
 }
 
-void canWalk(ArrayList <String > localScope):
+void canWalk(ArrayList <String > localScope, Token scope, boolean execute):
 {}
 {
   < CANWALK > < PI > (posibleOrientations()| posibleWalks()) < CM > parameter(localScope, true) < PD >
 }
 
-void condition(ArrayList <String > localScope):
+void condition(ArrayList <String > localScope, Token scope, boolean execute):
 {}
 {
   isFacing()
-  | isValid(localScope)
-  | canWalk(localScope)
+  | isValid(localScope, scope, execute)
+  | canWalk(localScope, scope, execute)
 }
 
-void not(ArrayList <String > localScope):
+void not(ArrayList <String > localScope, Token scope, boolean execute):
 {}
 {
-  < NOT > < PI > condition(localScope) < PD >
+  < NOT > < PI > condition(localScope, scope, execute) < PD >
 }
 
-void ifBlock(ArrayList <String > localScope):
+void ifBlock(ArrayList <String > localScope, Token scope, boolean execute):
 {}
 {
-  < IF > < PI > (not(localScope) | condition(localScope)) < PD > terminalBlock(localScope) ( < ELSE > terminalBlock(localScope) )? < FI >
+  < IF > < PI > (not(localScope, scope, execute) | condition(localScope, scope, execute)) < PD > terminalBlock(localScope, scope, execute) ( < ELSE > terminalBlock(localScope, scope, execute) )? < FI >
 }
 
-void whileBlock(ArrayList <String> localScope):
+void whileBlock(ArrayList <String> localScope, Token scope, boolean execute):
 {}
 {
-  < WHILE > < PI > ( not(localScope) | condition(localScope)) < PD > < DO > terminalBlock(localScope) < OD >
+  < WHILE > < PI > ( not(localScope, scope, execute) | condition(localScope, scope, execute)) < PD > < DO > terminalBlock(localScope, scope, execute) < OD >
 }
 
-void repeatBlock(ArrayList <String> localScope):
+void repeatBlock(ArrayList <String> localScope, Token scope, boolean execute):
 {}
 {
-  < REPEAT > parameter(localScope, true) terminalBlock(localScope) < PER >
+  < REPEAT > parameter(localScope, true) terminalBlock(localScope, scope, execute) < PER >
 }
-
 //	//boolean command(uniandes.lym.robot.view.Console sistema) :
 //	boolean command(Console sistema):
 //	{	

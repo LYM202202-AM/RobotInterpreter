@@ -16,7 +16,7 @@ public class Robot implements RobotConstants {
         static ArrayList<String > procNames = new ArrayList<String>();
         static HashMap<String, ArrayList<String>> procParams = new HashMap<String, ArrayList<String>>();
         static HashMap<String, Integer > globalScope = new HashMap<String, Integer>();
-        static HashMap<String, ArrayList<String> > procScope = new HashMap<String, ArrayList<String> >();
+        static HashMap<String, ArrayList<String> > procCommands = new HashMap<String, ArrayList<String> >();
         private RobotWorldDec world;
 
 
@@ -28,7 +28,8 @@ public class Robot implements RobotConstants {
 
   final public void program() throws ParseException {
   ArrayList<String> localScope = new ArrayList<String>();
-    jj_consume_token(PROG);
+  Token t;
+    t = jj_consume_token(PROG);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case VAR:
       varDef();
@@ -49,7 +50,7 @@ public class Robot implements RobotConstants {
       }
       procDef();
     }
-    insBlock(localScope);
+    insBlock(localScope, t, false);
     jj_consume_token(GORP);
   }
 
@@ -95,6 +96,7 @@ public class Robot implements RobotConstants {
   final public void procDef() throws ParseException {
         ArrayList <String > localScope = new ArrayList<String>();
         Token scope;
+  boolean execute = false;
     jj_consume_token(PROC);
     scope = saveGlobalNamesxType("PROC");
     jj_consume_token(PI);
@@ -120,19 +122,19 @@ public class Robot implements RobotConstants {
       ;
     }
     jj_consume_token(PD);
-    insBlock(localScope);
+    insBlock(localScope, scope, execute);
     jj_consume_token(CORP);
           System.out.println(scope.image);
           System.out.println(localScope);
   }
 
-  final public void insBlock(ArrayList <String> localScope) throws ParseException {
+  final public void insBlock(ArrayList <String> localScope, Token scope, boolean execute) throws ParseException {
     jj_consume_token(CBL);
-    globalCommand(localScope);
+    globalCommand(localScope, scope, execute);
     jj_consume_token(CBR);
   }
 
-  final public void rules(ArrayList <String> localScope) throws ParseException {
+  final public void rules(ArrayList <String> localScope, Token scope, boolean execute) throws ParseException {
   Token t;
   Token p;
   ArrayList <String> params = new ArrayList<String>();
@@ -174,8 +176,9 @@ public class Robot implements RobotConstants {
     }
   }
 
-  final public void globalCommand(ArrayList <String > localScope) throws ParseException {
-    command(localScope);
+  final public void globalCommand(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
+  ArrayList<String> commands = new ArrayList<String>();
+    command(localScope, scope, execute);
     label_5:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -187,21 +190,21 @@ public class Robot implements RobotConstants {
         break label_5;
       }
       jj_consume_token(SC);
-      command(localScope);
+      command(localScope, scope ,execute);
     }
   }
 
-  final public void command(ArrayList <String > localScope) throws ParseException {
+  final public void command(ArrayList <String > localScope, Token scope ,boolean execute) throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case DROP:
     case GRAB:
     case GET:
     case FREE:
     case POP:
-      posibleCommands(localScope);
+      posibleCommands(localScope, scope, execute);
       break;
     case JUMPTO:
-      jumpTo(localScope);
+      jumpTo(localScope, scope, execute);
       break;
     case VEER:
       veer();
@@ -210,16 +213,16 @@ public class Robot implements RobotConstants {
       look();
       break;
     case WALK:
-      walk(localScope);
+      walk(localScope, scope, execute);
       break;
     case CONSTANT:
     case WORD:
       if (jj_2_1(2)) {
-        assignment(localScope);
+        assignment(localScope, scope, execute);
       } else {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case WORD:
-          rules(localScope);
+          rules(localScope, scope, execute);
           break;
         default:
           jj_la1[8] = jj_gen;
@@ -229,13 +232,13 @@ public class Robot implements RobotConstants {
       }
       break;
     case IF:
-      ifBlock(localScope);
+      ifBlock(localScope, scope, execute);
       break;
     case WHILE:
-      whileBlock(localScope);
+      whileBlock(localScope, scope, execute);
       break;
     case REPEAT:
-      repeatBlock(localScope);
+      repeatBlock(localScope, scope, execute);
       break;
     default:
       jj_la1[9] = jj_gen;
@@ -244,7 +247,7 @@ public class Robot implements RobotConstants {
     }
   }
 
-  final public void posibleCommands(ArrayList <String > localScope) throws ParseException {
+  final public void posibleCommands(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case DROP:
       jj_consume_token(DROP);
@@ -305,7 +308,7 @@ public class Robot implements RobotConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public void jumpTo(ArrayList <String > localScope) throws ParseException {
+  final public void jumpTo(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
   Token t;
     jj_consume_token(JUMPTO);
     jj_consume_token(PI);
@@ -389,14 +392,14 @@ public class Robot implements RobotConstants {
     jj_consume_token(PD);
   }
 
-  final public void walk(ArrayList <String > localScope) throws ParseException {
+  final public void walk(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
     jj_consume_token(WALK);
     jj_consume_token(PI);
-    walksTypes(localScope);
+    walksTypes(localScope, scope, execute);
     jj_consume_token(PD);
   }
 
-  final public void walksTypes(ArrayList <String > localScope) throws ParseException {
+  final public void walksTypes(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case CONSTANT:
     case WORD:
@@ -425,7 +428,7 @@ public class Robot implements RobotConstants {
     }
   }
 
-  final public void assignment(ArrayList <String > localScope) throws ParseException {
+  final public void assignment(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
   Token t;
   Token n;
     t = parameter(localScope, false);
@@ -434,9 +437,9 @@ public class Robot implements RobotConstants {
     globalScope.put(t.image, Integer.parseInt(n.image));
   }
 
-  final public void terminalBlock(ArrayList <String > localScope) throws ParseException {
+  final public void terminalBlock(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
     jj_consume_token(CBL);
-    globalCommand(localScope);
+    globalCommand(localScope, scope, execute);
     jj_consume_token(CBR);
   }
 
@@ -477,7 +480,7 @@ public class Robot implements RobotConstants {
     jj_consume_token(PD);
   }
 
-  final public void isValid(ArrayList <String > localScope) throws ParseException {
+  final public void isValid(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
     jj_consume_token(ISVALID);
     jj_consume_token(PI);
     validList();
@@ -486,7 +489,7 @@ public class Robot implements RobotConstants {
     jj_consume_token(PD);
   }
 
-  final public void canWalk(ArrayList <String > localScope) throws ParseException {
+  final public void canWalk(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
     jj_consume_token(CANWALK);
     jj_consume_token(PI);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -512,16 +515,16 @@ public class Robot implements RobotConstants {
     jj_consume_token(PD);
   }
 
-  final public void condition(ArrayList <String > localScope) throws ParseException {
+  final public void condition(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case ISFACING:
       isFacing();
       break;
     case ISVALID:
-      isValid(localScope);
+      isValid(localScope, scope, execute);
       break;
     case CANWALK:
-      canWalk(localScope);
+      canWalk(localScope, scope, execute);
       break;
     default:
       jj_la1[18] = jj_gen;
@@ -530,24 +533,24 @@ public class Robot implements RobotConstants {
     }
   }
 
-  final public void not(ArrayList <String > localScope) throws ParseException {
+  final public void not(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
     jj_consume_token(NOT);
     jj_consume_token(PI);
-    condition(localScope);
+    condition(localScope, scope, execute);
     jj_consume_token(PD);
   }
 
-  final public void ifBlock(ArrayList <String > localScope) throws ParseException {
+  final public void ifBlock(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
     jj_consume_token(IF);
     jj_consume_token(PI);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case NOT:
-      not(localScope);
+      not(localScope, scope, execute);
       break;
     case ISFACING:
     case ISVALID:
     case CANWALK:
-      condition(localScope);
+      condition(localScope, scope, execute);
       break;
     default:
       jj_la1[19] = jj_gen;
@@ -555,11 +558,11 @@ public class Robot implements RobotConstants {
       throw new ParseException();
     }
     jj_consume_token(PD);
-    terminalBlock(localScope);
+    terminalBlock(localScope, scope, execute);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case ELSE:
       jj_consume_token(ELSE);
-      terminalBlock(localScope);
+      terminalBlock(localScope, scope, execute);
       break;
     default:
       jj_la1[20] = jj_gen;
@@ -568,17 +571,17 @@ public class Robot implements RobotConstants {
     jj_consume_token(FI);
   }
 
-  final public void whileBlock(ArrayList <String> localScope) throws ParseException {
+  final public void whileBlock(ArrayList <String> localScope, Token scope, boolean execute) throws ParseException {
     jj_consume_token(WHILE);
     jj_consume_token(PI);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case NOT:
-      not(localScope);
+      not(localScope, scope, execute);
       break;
     case ISFACING:
     case ISVALID:
     case CANWALK:
-      condition(localScope);
+      condition(localScope, scope, execute);
       break;
     default:
       jj_la1[21] = jj_gen;
@@ -587,14 +590,14 @@ public class Robot implements RobotConstants {
     }
     jj_consume_token(PD);
     jj_consume_token(DO);
-    terminalBlock(localScope);
+    terminalBlock(localScope, scope, execute);
     jj_consume_token(OD);
   }
 
-  final public void repeatBlock(ArrayList <String> localScope) throws ParseException {
+  final public void repeatBlock(ArrayList <String> localScope, Token scope, boolean execute) throws ParseException {
     jj_consume_token(REPEAT);
     parameter(localScope, true);
-    terminalBlock(localScope);
+    terminalBlock(localScope, scope, execute);
     jj_consume_token(PER);
   }
 
