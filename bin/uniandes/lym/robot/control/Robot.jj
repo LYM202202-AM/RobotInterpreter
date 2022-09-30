@@ -638,11 +638,25 @@ String assignment(ArrayList <String > localScope, Token scope, boolean execute):
   }
 }
 
+/*
+ * terminalBlock:
+ * Agrupa los comandos terminales para ser utilizados en las estructuras de control.
+ *
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ */
+
 void terminalBlock(ArrayList <String > localScope, Token scope, boolean execute):
 {}
 {
   < CBL > globalCommand(localScope, scope, execute) < CBR >
 }
+
+/*
+ * validList:
+ * Agrupa los comandos validos para ser utilizados por la condicion isValid de las estructuras de control.
+ */
 
 void validList():
 {}
@@ -656,11 +670,18 @@ void validList():
   | < POP >
 }
 
+/*
+ * isFacing:
+ * Reglas para la condicion isFacing.
+ */
+
 void isFacing():
 {}
 {
   < ISFACING > < PI > posibleOrientations() < PD >
 }
+
+// por favor documentar el resto de las reglas
 
 void isValid(ArrayList <String > localScope, Token scope, boolean execute):
 {}
