@@ -199,7 +199,7 @@ void program():
   Token t;
 }
 {
-	t=< PROG > (varDef())? (procDef())* insBlock(localScope, t, false) < GORP >
+	t=< PROG > (varDef())? (procDef())* insBlock(localScope, t, true) < GORP >
 }
 
 /*
@@ -344,6 +344,17 @@ String rules(ArrayList <String> localScope, Token scope, boolean execute):
   }
 }
 
+/*
+ * GlobalCommand:
+ * Reglas para los comandos en el bloque de instrucciones.
+ * Verifica que el comando exista y que los parametros sean correctos,
+ * ademas de agregar los comandos a la lista de comandos del procedimiento.
+ *
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ */
+
 void globalCommand(ArrayList <String > localScope, Token scope, boolean execute):
 {
   ArrayList<String> commands = new ArrayList<String>();
@@ -359,6 +370,18 @@ void globalCommand(ArrayList <String > localScope, Token scope, boolean execute)
     procCommands.put(scope.image, commands);
   }
 }
+
+/*
+ * Command:
+ * Reglas para los comandos en el bloque de instrucciones.
+ * Verifica que el comando exista y que los parametros sean correctos.
+ * el comando se ejecuta si el procedimiento se ejecuta.
+ *
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ * return: String que contiene el nombre del comando
+ */
 
 String command(ArrayList <String > localScope, Token scope ,boolean execute):
 {
@@ -386,6 +409,17 @@ String command(ArrayList <String > localScope, Token scope ,boolean execute):
   }
 }
 
+/*
+ * PosibleCommands:
+ *
+ * Agrupa los comandos que requieren de un parametro de tipo entero.
+ *
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ * return: String que contiene el nombre del comando
+ */
+
 String posibleCommands(ArrayList <String > localScope, Token scope, boolean execute):
 {
   Token t;
@@ -400,6 +434,17 @@ String posibleCommands(ArrayList <String > localScope, Token scope, boolean exec
   }
 }
 
+/*
+ * parameter:
+ * Reglas para los parametros de los comandos.
+ * Verifica que el parametro sea correcto.
+ * Si el parametro es una variable, verifica que exista.
+ * Si el parametro es un entero, verifica que sea un entero y que el comando acepte enteros (allowInt).
+ *
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param allowInt: booleano que indica si el parametro puede ser un entero
+ * return: Token que contiene el parametro
+ */
 
 Token parameter(ArrayList <String > localScope, boolean allowInt):
 {
@@ -432,6 +477,16 @@ Token parameter(ArrayList <String > localScope, boolean allowInt):
 }
 
 
+/*
+ * jumpTo:
+ * Reglas para el comando jumpTo.
+ * 
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ * return: String que contiene el nombre del comando (jumpTo)
+ */
+
 String jumpTo(ArrayList <String > localScope, Token scope, boolean execute):
 {
   Token t;
@@ -443,11 +498,21 @@ String jumpTo(ArrayList <String > localScope, Token scope, boolean execute):
   }
 }
 
+/*
+ * posibleDirections:
+ * Lista de direcciones posibles para el comando veer.
+ */
+
 void posibleDirections():
 {}
 {
   < AROUND > | < LEFT > | < RIGHT >
 }
+
+/*
+ * posibleOrientations:
+ * Lista de orientaciones posibles para el comando look o walk.
+ */
 
 void posibleOrientations():
 {}
@@ -455,11 +520,23 @@ void posibleOrientations():
   < NORTH > | < SOUTH > | < EAST > | < WEST >
 }
 
+/*
+ * posibleWalks:
+ * Lista de direcciones posibles para el comando walk.
+ */
+
 void posibleWalks():
 {}
 {
   < FRONT > | < BACK > | < LEFT > | < RIGHT >
 }
+
+/*
+ * veer:
+ * Reglas para el comando veer.
+ *
+ * return: String que contiene el nombre del comando (veer)
+ */
 
 String veer():
 {
@@ -472,7 +549,12 @@ String veer():
   }
 }
 
-// look with return of String
+/*
+ * look:
+ * Reglas para el comando look.
+ *
+ * return: String que contiene el nombre del comando (look)
+ */
 String look():
 {
   Token t;
@@ -483,6 +565,17 @@ String look():
     return t.image;
   }
 }
+
+/*
+ * walk:
+ * Reglas para el comando walk.
+ * 
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ * 
+ * return: String que contiene el nombre del comando (walk)
+ */
 
 String walk(ArrayList <String > localScope, Token scope, boolean execute):
 {
@@ -495,6 +588,15 @@ String walk(ArrayList <String > localScope, Token scope, boolean execute):
   }
 }
 
+/*
+ * walksTypes:
+ * Agrupa las variantes del comando walk segun los parametros.
+ * 
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ * 
+ */
 
 void walksTypes(ArrayList <String > localScope, Token scope, boolean execute):
 {}
@@ -504,6 +606,17 @@ void walksTypes(ArrayList <String > localScope, Token scope, boolean execute):
   | posibleOrientations() < CM > parameter(localScope, true)
 }
 
+/*
+ * assignmment:
+ * Reglas para el comando de asignacion.
+ * 
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ * 
+ * return: String que contiene el nombre de la variable
+ */
+
 String assignment(ArrayList <String > localScope, Token scope, boolean execute):
 {
   Token t;
@@ -512,7 +625,15 @@ String assignment(ArrayList <String > localScope, Token scope, boolean execute):
 {
   t=parameter(localScope, false) < ASSIGNMENT > n=< CONSTANT >
   {
-    globalScope.put(t.image, Integer.parseInt(n.image));
+    if (execute){
+      if (localScope.contains(t.image)){
+        localScope.set(localScope.indexOf(t.image), n.image);
+      } else if (varNames.contains(t.image)){
+        globalScope.put(t.image, Integer.parseInt(n.image));
+      } else {
+        System.out.println("Variable no declarada:" + t.image);
+      }
+    }
     return t.image;
   }
 }
