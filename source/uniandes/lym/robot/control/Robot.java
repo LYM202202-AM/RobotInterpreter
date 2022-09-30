@@ -6,8 +6,7 @@ import uniandes.lym.robot.view.Console;
 
 import java.awt.Point;
 import java.io.*;
-import java.util.Vector;
-import java.util.LinkedList;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public class Robot implements RobotConstants {
@@ -23,6 +22,37 @@ public class Robot implements RobotConstants {
         void setWorld(RobotWorld w) {
                 world = (RobotWorldDec) w;
         }
+
+        public static void main(String args[]) throws ParseException, IOException{
+    Robot parser = new Robot(System.in);
+    while (true)
+    {
+      System.out.println("Reading from standard input...");
+      System.out.print("Enter an expression like \u005c"1+(2+3)*4;\u005c" :");
+      try {
+        varNames.clear();
+        procNames.clear();
+        procParams.clear();
+        globalScope.clear();
+        procCommands.clear();
+        parser.program();
+        System.out.println("Programa leido correctamente");
+        System.out.println("Variables: " + varNames);
+        System.out.println("Procedimientos: " + procNames);
+        System.out.println("Parametros: " + procParams);
+        System.out.println("Comandos: " + procCommands);
+        System.out.println("Variables globales: " + globalScope);
+      }
+      catch (ParseException e) {
+        System.out.println(e.getMessage());
+      }
+      catch (TokenMgrError e) {
+        System.out.println(e.getMessage());
+      }
+    }
+  }
+
+
 
         String salida=new String();
 
@@ -134,7 +164,7 @@ public class Robot implements RobotConstants {
     jj_consume_token(CBR);
   }
 
-  final public void rules(ArrayList <String> localScope, Token scope, boolean execute) throws ParseException {
+  final public String rules(ArrayList <String> localScope, Token scope, boolean execute) throws ParseException {
   Token t;
   Token p;
   ArrayList <String> params = new ArrayList<String>();
@@ -174,6 +204,8 @@ public class Robot implements RobotConstants {
     } else {
       System.out.println("Incorrecto, no existe el procedimiento");
     }
+    {if (true) return t.image;}
+    throw new Error("Missing return statement in function");
   }
 
   final public void globalCommand(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
@@ -318,14 +350,16 @@ public class Robot implements RobotConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public void jumpTo(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
+  final public String jumpTo(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
   Token t;
-    jj_consume_token(JUMPTO);
+    t = jj_consume_token(JUMPTO);
     jj_consume_token(PI);
     parameter(localScope, true);
     jj_consume_token(CM);
     parameter(localScope, true);
     jj_consume_token(PD);
+    {if (true) return t.image;}
+    throw new Error("Missing return statement in function");
   }
 
   final public void posibleDirections() throws ParseException {
@@ -388,25 +422,35 @@ public class Robot implements RobotConstants {
     }
   }
 
-  final public void veer() throws ParseException {
-    jj_consume_token(VEER);
+  final public String veer() throws ParseException {
+  Token t;
+    t = jj_consume_token(VEER);
     jj_consume_token(PI);
     posibleDirections();
     jj_consume_token(PD);
+    {if (true) return t.image;}
+    throw new Error("Missing return statement in function");
   }
 
-  final public void look() throws ParseException {
-    jj_consume_token(LOOK);
+// look with return of String
+  final public String look() throws ParseException {
+  Token t;
+    t = jj_consume_token(LOOK);
     jj_consume_token(PI);
     posibleOrientations();
     jj_consume_token(PD);
+    {if (true) return t.image;}
+    throw new Error("Missing return statement in function");
   }
 
-  final public void walk(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
-    jj_consume_token(WALK);
+  final public String walk(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
+  Token t;
+    t = jj_consume_token(WALK);
     jj_consume_token(PI);
     walksTypes(localScope, scope, execute);
     jj_consume_token(PD);
+    {if (true) return t.image;}
+    throw new Error("Missing return statement in function");
   }
 
   final public void walksTypes(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
@@ -438,13 +482,15 @@ public class Robot implements RobotConstants {
     }
   }
 
-  final public void assignment(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
+  final public String assignment(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
   Token t;
   Token n;
     t = parameter(localScope, false);
     jj_consume_token(ASSIGNMENT);
     n = jj_consume_token(CONSTANT);
     globalScope.put(t.image, Integer.parseInt(n.image));
+    {if (true) return t.image;}
+    throw new Error("Missing return statement in function");
   }
 
   final public void terminalBlock(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
@@ -550,8 +596,9 @@ public class Robot implements RobotConstants {
     jj_consume_token(PD);
   }
 
-  final public void ifBlock(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
-    jj_consume_token(IF);
+  final public String ifBlock(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
+  Token t;
+    t = jj_consume_token(IF);
     jj_consume_token(PI);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case NOT:
@@ -579,10 +626,13 @@ public class Robot implements RobotConstants {
       ;
     }
     jj_consume_token(FI);
+    {if (true) return t.image;}
+    throw new Error("Missing return statement in function");
   }
 
-  final public void whileBlock(ArrayList <String> localScope, Token scope, boolean execute) throws ParseException {
-    jj_consume_token(WHILE);
+  final public String whileBlock(ArrayList <String> localScope, Token scope, boolean execute) throws ParseException {
+  Token t;
+    t = jj_consume_token(WHILE);
     jj_consume_token(PI);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case NOT:
@@ -602,13 +652,18 @@ public class Robot implements RobotConstants {
     jj_consume_token(DO);
     terminalBlock(localScope, scope, execute);
     jj_consume_token(OD);
+    {if (true) return t.image;}
+    throw new Error("Missing return statement in function");
   }
 
-  final public void repeatBlock(ArrayList <String> localScope, Token scope, boolean execute) throws ParseException {
-    jj_consume_token(REPEAT);
+  final public String repeatBlock(ArrayList <String> localScope, Token scope, boolean execute) throws ParseException {
+  Token t;
+    t = jj_consume_token(REPEAT);
     parameter(localScope, true);
     terminalBlock(localScope, scope, execute);
     jj_consume_token(PER);
+    {if (true) return t.image;}
+    throw new Error("Missing return statement in function");
   }
 
   private boolean jj_2_1(int xla) {
@@ -616,6 +671,11 @@ public class Robot implements RobotConstants {
     try { return !jj_3_1(); }
     catch(LookaheadSuccess ls) { return true; }
     finally { jj_save(0, xla); }
+  }
+
+  private boolean jj_3R_9() {
+    if (jj_scan_token(CONSTANT)) return true;
+    return false;
   }
 
   private boolean jj_3R_8() {
@@ -641,11 +701,6 @@ public class Robot implements RobotConstants {
   private boolean jj_3R_6() {
     if (jj_3R_7()) return true;
     if (jj_scan_token(ASSIGNMENT)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_9() {
-    if (jj_scan_token(CONSTANT)) return true;
     return false;
   }
 

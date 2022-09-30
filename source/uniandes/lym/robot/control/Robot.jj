@@ -30,18 +30,21 @@ import uniandes.lym.robot.view.Console;
  
 import java.awt.Point;
 import java.io.*;
-import java.util.Vector;
-import java.util.LinkedList;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public class Robot 
 {
-
- 	static ArrayList<String > varNames = new ArrayList<String>();
-  	static ArrayList<String > procNames = new ArrayList<String>();
+  // varNames es un arreglo de Strings que contiene los nombres de las variables
+  static ArrayList<String > varNames = new ArrayList<String>();
+  // procNames es un arreglo de Strings que contiene los nombres de los procedimientos
+  static ArrayList<String > procNames = new ArrayList<String>();
+  // procParams es un HashMap que contiene como llave el nombre del procedimiento y como valor un arreglo de Strings con los nombres de los parametros
 	static HashMap<String, ArrayList<String>> procParams = new HashMap<String, ArrayList<String>>();
- 	static HashMap<String, Integer > globalScope = new HashMap<String, Integer>();
-  	static HashMap<String, ArrayList<String> > procCommands = new HashMap<String, ArrayList<String> >();
+  // globalScope es un HashMap que contiene como llave el nombre de la variable y como valor su entero asociado
+  static HashMap<String, Integer > globalScope = new HashMap<String, Integer>();
+  // procCommands es un HashMap que contiene como llave el nombre de un procedimiento y como valor una lista de comandos
+  static HashMap<String, ArrayList<String> > procCommands = new HashMap<String, ArrayList<> >();
 	private RobotWorldDec world;
 	
 	
@@ -49,10 +52,45 @@ public class Robot
 		world = (RobotWorldDec) w;	
 	}
 
+	public static void main(String args[]) throws ParseException, IOException{
+    Robot parser = new Robot(System.in);
+    while (true)
+    {
+      System.out.println("Reading from standard input...");
+      System.out.print("Enter an expression:");
+      try {
+        // limpia los arreglos y los HashMaps
+        varNames.clear();
+        procNames.clear();
+        procParams.clear();
+        globalScope.clear();
+        procCommands.clear();
+        // ejecuta la gramatica
+        parser.program();
+        System.out.println("Programa leido correctamente");
+        System.out.println("Variables: " + varNames);
+        System.out.println("Procedimientos: " + procNames);
+        System.out.println("Parametros: " + procParams);
+        System.out.println("Comandos: " + procCommands);
+        System.out.println("Variables globales: " + globalScope);
+      }
+      catch (ParseException e) {
+        System.out.println(e.getMessage());
+      }
+      catch (TokenMgrError e) {
+        System.out.println(e.getMessage());
+      }
+    }
+  }
+
+	
+
 	String salida=new String();
 }
 PARSER_END(Robot)
 
+
+// Tokens que se ignoran
 SKIP:
 {
 		" "
@@ -60,18 +98,6 @@ SKIP:
 	|	"\t"
 	| 	"\n"
 }
-/*
-TOKEN:
-{
-			< MOV:  "Mov" >
-		| 	< RIGHT: "RIGHT" >
-		| 	< PUT: "Put" >
-		| 	< PICK: "Pick" >
-		|  	< POP: "Pop" >
-		| 	< GO: "GO" >
-        |  	< HOP:  "HOP" >		
-
-}*/
 
 TOKEN: /*Comandos*/
 {
@@ -110,7 +136,7 @@ TOKEN:/*Walks */
 }
 
 
-TOKEN: /* Condiciones */
+TOKEN: /* Conditions */
 {
 	< ISFACING: "isfacing" >
 |	< ISVALID: "isValid"  >
@@ -140,7 +166,7 @@ TOKEN:/*Control structures */
 | < PICK: "pick" >
 }
 
-TOKEN :
+TOKEN : // Terminales generales
 {
     < CONSTANT : (< DIGIT >)+ >
 |	< WORD: (< LMINUS > | < LMAYUS >)(< LMINUS > | < LMAYUS > | < DIGIT >)* >
@@ -150,7 +176,7 @@ TOKEN :
 }
 
 
-TOKEN:
+TOKEN: // simbolos
 {
 	< ASSIGNMENT : ":=" >
 |	< PI : "(" >
@@ -162,6 +188,11 @@ TOKEN:
 }
 
 
+// Reglas de la gramatica
+
+
+// Base de la gramatica
+
 void program():
 {
   ArrayList<String> localScope = new ArrayList<String>();
@@ -171,13 +202,26 @@ void program():
 	t=< PROG > (varDef())? (procDef())* insBlock(localScope, t, false) < GORP >
 }
 
+/*
+ * Definicion de variables
+ * linea inicial de la forma: VAR <listaDeVariables> SC
+ * listaDeVariables de la forma: WORD (CM WORD)*
+ * ejemplo: VAR x, y, z;
+ */
+
 void varDef():
 {
-  
 }
 {
 	< VAR > saveGlobalNamesxType("VAR")( < CM > saveGlobalNamesxType("VAR"))* < SC >
 }
+
+/*
+ * Guarda los nombres de las variables y los parametros de los procedimientos
+ * en sus respectivos HashMaps y arreglos
+ * @param type: tipo de variable o procedimiento (VAR o PROC)
+ * return: un token que contiene el nombre de la variable o procedimiento
+ */
 
 Token saveGlobalNamesxType(String type):
 {
@@ -196,7 +240,14 @@ Token saveGlobalNamesxType(String type):
 	}
 }
 
-void saveLocalNamesxType(ArrayList <String > localScope, String procN): /*Arreglar*/
+/*
+ * Guarda las variables locales de un procedimiento en su respectivo HashMap
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param procName: nombre del procedimiento.
+ * return: un token que contiene el nombre de la variable
+ */
+
+Token saveLocalNamesxType(ArrayList <String > localScope, String procN): /*Arreglar*/
 {
   Token t;
 }
@@ -205,11 +256,19 @@ void saveLocalNamesxType(ArrayList <String > localScope, String procN): /*Arregl
 	{
 		localScope.add(t.image);
     procParams.get(procN).add(t.image);
-
+    return t;
 	}
 }
 
-void procDef():
+/*
+ * Definicion de procedimientos
+ * ejemplos:
+ *  PROC procName (param1, param2) { ... }
+ *  PROC procName () { ... }
+ * return: un token que contiene el nombre del procedimiento
+ */
+
+Token procDef():
 {
 	ArrayList <String > localScope = new ArrayList<String>();
 	Token scope;
@@ -221,8 +280,23 @@ void procDef():
 	{
 	  System.out.println(scope.image);
 	  System.out.println(localScope);
+    return scope;
 	}
 }
+
+/*
+ * Bloque de instrucciones
+ * ejemplo:
+ *  {
+ *  drop(c);
+ *  free (b);
+ *  walk(n);
+ *  drop(  12)
+ *  }
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ */
 
 void insBlock(ArrayList <String> localScope, Token scope, boolean execute):
 {
@@ -230,6 +304,16 @@ void insBlock(ArrayList <String> localScope, Token scope, boolean execute):
 {
   < CBL > globalCommand(localScope, scope, execute) < CBR >
 }
+
+/*
+ * Reglas personalizadas para los procedimientos definidos por el usuario
+ * Verifican que el procedimiento exista y que los parametros sean correctos
+ *
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ * return: String que contiene el nombre del procedimiento
+ */
 
 String rules(ArrayList <String> localScope, Token scope, boolean execute):
 {
