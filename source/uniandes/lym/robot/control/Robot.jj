@@ -304,9 +304,10 @@ void procDef():
 
 void insBlock(ArrayList <String> localScope, Token scope, boolean execute):
 {
+  String estructura = scope.image;
 }
 {
-  < CBL > globalCommand(localScope, scope, execute) < CBR >
+  < CBL > globalCommand(localScope, scope, execute, estructura) < CBR >
 }
 
 /*
@@ -319,7 +320,7 @@ void insBlock(ArrayList <String> localScope, Token scope, boolean execute):
  * return: String que contiene el nombre del procedimiento
  */
 
-String rules(ArrayList <String> localScope, Token scope, boolean execute):
+String rules(ArrayList <String> localScope, Token scope, boolean execute, String estructura):
 {
   Token t;
   Token p;
@@ -361,11 +362,11 @@ String rules(ArrayList <String> localScope, Token scope, boolean execute):
  * @param execute: booleano que indica si el procedimiento se ejecuta o no
  */
 
-void globalCommand(ArrayList <String > localScope, Token scope, boolean execute):
+void globalCommand(ArrayList <String > localScope, Token scope, boolean execute, String estructura):
 {
 }
 {
-	command(localScope, scope, execute)(< SC > command(localScope, scope ,execute))*
+	command(localScope, scope, execute, estructura)(< SC > command(localScope, scope ,execute, estructura))*
 }
 
 /*
@@ -380,21 +381,21 @@ void globalCommand(ArrayList <String > localScope, Token scope, boolean execute)
  * return: String que contiene el nombre del comando
  */
 
-void command(ArrayList <String > localScope, Token scope ,boolean execute):
+void command(ArrayList <String > localScope, Token scope ,boolean execute, String estructura):
 {
 }
 {
   (
-  posibleCommands(localScope, scope, execute)
-  | jumpTo(localScope, scope, execute)
-  | veer(scope, execute)
-  | look(scope, execute)
-  | walk(localScope, scope, execute)
+  posibleCommands(localScope, scope, execute, estructura)
+  | jumpTo(localScope, scope, execute, estructura)
+  | veer(scope, execute, estructura)
+  | look(scope, execute, estructura)
+  | walk(localScope, scope, execute, estructura)
   |
   (
   LOOKAHEAD(2)
-  assignment(localScope, scope, execute)
-  | rules(localScope, scope, execute)
+  assignment(localScope, scope, execute, estructura)
+  | rules(localScope, scope, execute, estructura)
   )
   | ifBlock(localScope, scope, execute)
   | whileBlock(localScope, scope, execute)
@@ -413,7 +414,7 @@ void command(ArrayList <String > localScope, Token scope ,boolean execute):
  * return: String que contiene el nombre del comando
  */
 
-void posibleCommands(ArrayList <String > localScope, Token scope, boolean execute):
+void posibleCommands(ArrayList <String > localScope, Token scope, boolean execute, String estructura):
 {
   Token t;
   // hashmap que contiene como llave el nombre del comando y como valor un arreglo con los parametros
@@ -493,7 +494,7 @@ Token parameter(ArrayList <String > localScope, boolean allowInt):
  * return: String que contiene el nombre del comando (jumpTo)
  */
 
-void jumpTo(ArrayList <String > localScope, Token scope, boolean execute):
+void jumpTo(ArrayList <String > localScope, Token scope, boolean execute, String estructura):
 {
   Token t;
   Token p1;
@@ -557,10 +558,18 @@ Token posibleOrientations():
  * Lista de direcciones posibles para el comando walk.
  */
 
-void posibleWalks():
-{}
+// posibleWalks with return of token
+
+Token posibleWalks():
 {
-  < FRONT > | < BACK > | < LEFT > | < RIGHT >
+  Token t;
+}
+
+{
+  (t=< FRONT > | t=< BACK > | t=< LEFT > | t=< RIGHT >)
+  {
+    return t;
+  }
 }
 
 /*
@@ -570,7 +579,7 @@ void posibleWalks():
  * return: String que contiene el nombre del comando (veer)
  */
 
-void veer(Token scope, boolean execute):
+void veer(Token scope, boolean execute, String estructura):
 {
   Token t;
   Token d;
@@ -597,7 +606,7 @@ void veer(Token scope, boolean execute):
  *
  * return: String que contiene el nombre del comando (look)
  */
-void look(Token scope, boolean execute):
+void look(Token scope, boolean execute, String estructura):
 {
   Token t;
   Token o;
@@ -629,12 +638,13 @@ void look(Token scope, boolean execute):
  * return: String que contiene el nombre del comando (walk)
  */
 
-void walk(ArrayList <String > localScope, Token scope, boolean execute):
+
+void walk(ArrayList <String > localScope, Token scope, boolean execute, String estructura):
 {
 
 }
 {
-  < WALK > < PI > walksTypes(localScope, scope, execute) < PD >
+  < WALK > < PI > walksTypes(localScope, scope, execute, estructura) < PD >
 }
 
 /*
@@ -647,8 +657,9 @@ void walk(ArrayList <String > localScope, Token scope, boolean execute):
  * 
  */
 
-void walksTypes(ArrayList <String > localScope, Token scope, boolean execute):
+void walksTypes(ArrayList <String > localScope, Token scope, boolean execute, String estructura):
 {
+  String walk = "walk";
   // hashmap que contiene como llave el nombre del comando y como valor un arreglo con los parametros
   HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
   ArrayList <String> params = new ArrayList<String>();
@@ -657,23 +668,22 @@ void walksTypes(ArrayList <String > localScope, Token scope, boolean execute):
 }
 {
   (p1=parameter(localScope, true)
-  | p1=posibleWalks() < CM > p2=parameter(localScope, true)
-  | p1=posibleOrientations() < CM > p2=parameter(localScope, true))
+  | p1=posibleWalks() < CM > p2=parameter(localScope, true){
+    params.add(p2.image);
+  }
+  | p1=posibleOrientations() < CM > p2=parameter(localScope, true)
+  {
+    params.add(p2.image);
+  })
   {
     if (execute){
-      System.out.println(t.image + " " + params);
+      System.out.println(walk + " " + params);
     } else {
-      if (p2 != null){
-        params.add(p1.image);
-        params.add(p2.image);
-      } else {
-        params.add(p1.image);
-      }
-      hashmapComandos.put(<WALK>.image, params);
-      procCommands.get(scope.image).add(hashmapComandos);
+      params.add(p1.image);
+    hashmapComandos.put(walk, params);
+    procCommands.get(scope.image).add(hashmapComandos);
     }
   }
-  
 }
 
 /*
@@ -687,7 +697,7 @@ void walksTypes(ArrayList <String > localScope, Token scope, boolean execute):
  * return: String que contiene el nombre de la variable
  */
 
-void assignment(ArrayList <String > localScope, Token scope, boolean execute):
+void assignment(ArrayList <String > localScope, Token scope, boolean execute, String estructura):
 {
   Token t;
   Token n;
@@ -722,10 +732,10 @@ void assignment(ArrayList <String > localScope, Token scope, boolean execute):
  * @param execute: booleano que indica si el procedimiento se ejecuta o no
  */
 
-void terminalBlock(ArrayList <String > localScope, Token scope, boolean execute):
+void terminalBlock(ArrayList <String > localScope, Token scope, boolean execute, String estructura):
 {}
 {
-  < CBL > globalCommand(localScope, scope, execute) < CBR >
+  < CBL > globalCommand(localScope, scope,execute, estructura) < CBR >
 }
 
 /*
@@ -758,64 +768,59 @@ void isFacing():
 
 // por favor documentar el resto de las reglas
 
-void isValid(ArrayList <String > localScope, Token scope, boolean execute):
+void isValid(ArrayList <String > localScope, Token scope, boolean execute, String estructura):
 {}
 {
   < ISVALID > < PI > validList() < CM > parameter(localScope, true) < PD >
 }
 
-void canWalk(ArrayList <String > localScope, Token scope, boolean execute):
+void canWalk(ArrayList <String > localScope, Token scope, boolean execute, String estructura):
 {}
 {
   < CANWALK > < PI > (posibleOrientations()| posibleWalks()) < CM > parameter(localScope, true) < PD >
 }
 
-void condition(ArrayList <String > localScope, Token scope, boolean execute):
+void condition(ArrayList <String > localScope, Token scope, boolean execute, String estructura):
 {}
 {
   isFacing()
-  | isValid(localScope, scope, execute)
-  | canWalk(localScope, scope, execute)
+  | isValid(localScope, scope,execute, estructura)
+  | canWalk(localScope, scope,execute, estructura)
 }
 
-void not(ArrayList <String > localScope, Token scope, boolean execute):
+void not(ArrayList <String > localScope, Token scope, boolean execute, String estructura):
 {}
 {
-  < NOT > < PI > condition(localScope, scope, execute) < PD >
+  < NOT > < PI > condition(localScope, scope,execute, estructura) < PD >
 }
 
-String ifBlock(ArrayList <String > localScope, Token scope, boolean execute):
+void ifBlock(ArrayList <String > localScope, Token scope, boolean execute):
 {
   Token t;
+  String estructura = "if";
 }
 {
-  t=< IF > < PI > (not(localScope, scope, execute) | condition(localScope, scope, execute)) < PD > terminalBlock(localScope, scope, execute) ( < ELSE > terminalBlock(localScope, scope, execute) )? < FI >
+  < IF > < PI > (not(localScope, scope, execute, estructura) | condition(localScope, scope, execute, estructura)) < PD > terminalBlock(localScope, scope, execute, estructura) ( < ELSE >terminalBlock(localScope, scope, execute, "else") )? < FI >
 
-  {
-    return t.image;
-  }
 }
 
-String whileBlock(ArrayList <String> localScope, Token scope, boolean execute):
+void whileBlock(ArrayList <String> localScope, Token scope, boolean execute):
 {
   Token t;
+  String estructura = "while";
 }
 {
-  t=< WHILE > < PI > ( not(localScope, scope, execute) | condition(localScope, scope, execute)) < PD > < DO > terminalBlock(localScope, scope, execute) < OD >
-  {
-    return t.image;
-  }
+  <WHILE > < PI > ( not(localScope, scope, execute, estructura) | condition(localScope, scope, execute, estructura)) < PD > < DO > terminalBlock(localScope, scope, execute, estructura) < OD >
 }
 
-String repeatBlock(ArrayList <String> localScope, Token scope, boolean execute):
+void repeatBlock(ArrayList <String> localScope, Token scope, boolean execute):
 {
   Token t;
+  String estructura="repeat";
 }
 {
-  t=< REPEAT > parameter(localScope, true) terminalBlock(localScope, scope, execute) < PER >
-  {
-    return t.image;
-  }
+  < REPEAT >
+  parameter(localScope, true) terminalBlock(localScope, scope, execute, estructura) < PER >
 }
 //	//boolean command(uniandes.lym.robot.view.Console sistema) :
 //	boolean command(Console sistema):
