@@ -10,12 +10,16 @@ import java.util.*;
 
 @SuppressWarnings("serial")
 public class Robot implements RobotConstants {
-
-        static ArrayList<String > varNames = new ArrayList<String>();
-        static ArrayList<String > procNames = new ArrayList<String>();
+  // varNames es un arreglo de Strings que contiene los nombres de las variables
+  static ArrayList<String > varNames = new ArrayList<String>();
+  // procNames es un arreglo de Strings que contiene los nombres de los procedimientos
+  static ArrayList<String > procNames = new ArrayList<String>();
+  // procParams es un HashMap que contiene como llave el nombre del procedimiento y como valor un arreglo de Strings con los nombres de los parametros
         static HashMap<String, ArrayList<String>> procParams = new HashMap<String, ArrayList<String>>();
-        static HashMap<String, Integer > globalScope = new HashMap<String, Integer>();
-        static HashMap<String, ArrayList<String> > procCommands = new HashMap<String, ArrayList<String> >();
+  // globalScope es un HashMap que contiene como llave el nombre de la variable y como valor su entero asociado
+  static HashMap<String, Integer > globalScope = new HashMap<String, Integer>();
+  // procCommands es un HashMap que contiene como llave el nombre de un procedimiento y como valor un hashmap que contiene como llave el nombre del comando y como valor un arreglo de Strings con los parametros del comando
+  static HashMap<String, ArrayList<HashMap<String, ArrayList<String>>>> procCommands = new HashMap<String,  ArrayList<HashMap<String, ArrayList<String>>>>();
         private RobotWorldDec world;
 
 
@@ -28,13 +32,15 @@ public class Robot implements RobotConstants {
     while (true)
     {
       System.out.println("Reading from standard input...");
-      System.out.print("Enter an expression like \u005c"1+(2+3)*4;\u005c" :");
+      System.out.print("Enter an expression:");
       try {
+        // limpia los arreglos y los HashMaps
         varNames.clear();
         procNames.clear();
         procParams.clear();
         globalScope.clear();
         procCommands.clear();
+        // ejecuta la gramatica
         parser.program();
         System.out.println("Programa leido correctamente");
         System.out.println("Variables: " + varNames);
@@ -56,6 +62,10 @@ public class Robot implements RobotConstants {
 
         String salida=new String();
 
+// Reglas de la gramatica
+
+
+// Base de la gramatica
   final public void program() throws ParseException {
   ArrayList<String> localScope = new ArrayList<String>();
   Token t;
@@ -80,10 +90,16 @@ public class Robot implements RobotConstants {
       }
       procDef();
     }
-    insBlock(localScope, t, false);
+    insBlock(localScope, t, true);
     jj_consume_token(GORP);
   }
 
+/*
+ * Definicion de variables
+ * linea inicial de la forma: VAR <listaDeVariables> SC
+ * listaDeVariables de la forma: WORD (CM WORD)*
+ * ejemplo: VAR x, y, z;
+ */
   final public void varDef() throws ParseException {
     jj_consume_token(VAR);
     saveGlobalNamesxType("VAR");
@@ -103,6 +119,12 @@ public class Robot implements RobotConstants {
     jj_consume_token(SC);
   }
 
+/*
+ * Guarda los nombres de las variables y los parametros de los procedimientos
+ * en sus respectivos HashMaps y arreglos
+ * @param type: tipo de variable o procedimiento (VAR o PROC)
+ * return: un token que contiene el nombre de la variable o procedimiento
+ */
   final public Token saveGlobalNamesxType(String type) throws ParseException {
   Token t;
     t = jj_consume_token(WORD);
@@ -116,19 +138,39 @@ public class Robot implements RobotConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public void saveLocalNamesxType(ArrayList <String > localScope, String procN) throws ParseException {
+/*
+ * Guarda las variables locales de un procedimiento en su respectivo HashMap
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param procName: nombre del procedimiento.
+ * return: un token que contiene el nombre de la variable
+ */
+  final public Token saveLocalNamesxType(ArrayList <String > localScope, String procN) throws ParseException {
   Token t;
     t = jj_consume_token(WORD);
                 localScope.add(t.image);
     procParams.get(procN).add(t.image);
+    {if (true) return t;}
+    throw new Error("Missing return statement in function");
   }
 
+/*
+ * Definicion de procedimientos
+ * ejemplos:
+ *  PROC procName (param1, param2) { ... }
+ *  PROC procName () { ... }
+ * return: un token que contiene el nombre del procedimiento
+ */
   final public void procDef() throws ParseException {
         ArrayList <String > localScope = new ArrayList<String>();
         Token scope;
   boolean execute = false;
+  // Arraylist que contiene hashmaps donde la llave es el nombre del comando y el valor es un arreglo con los parametros
+  ArrayList<HashMap<String, ArrayList<String>>> listaMapaComandos = new ArrayList<HashMap<String, ArrayList<String>>>();
     jj_consume_token(PROC);
     scope = saveGlobalNamesxType("PROC");
+          System.out.println(scope.image);
+          System.out.println(localScope);
+    procCommands.put(scope.image, listaMapaComandos);
     jj_consume_token(PI);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case WORD:
@@ -154,16 +196,36 @@ public class Robot implements RobotConstants {
     jj_consume_token(PD);
     insBlock(localScope, scope, execute);
     jj_consume_token(CORP);
-          System.out.println(scope.image);
-          System.out.println(localScope);
   }
 
+/*
+ * Bloque de instrucciones
+ * ejemplo:
+ *  {
+ *  drop(c);
+ *  free (b);
+ *  walk(n);
+ *  drop(  12)
+ *  }
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ */
   final public void insBlock(ArrayList <String> localScope, Token scope, boolean execute) throws ParseException {
     jj_consume_token(CBL);
     globalCommand(localScope, scope, execute);
     jj_consume_token(CBR);
   }
 
+/*
+ * Reglas personalizadas para los procedimientos definidos por el usuario
+ * Verifican que el procedimiento exista y que los parametros sean correctos
+ *
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ * return: String que contiene el nombre del procedimiento
+ */
   final public String rules(ArrayList <String> localScope, Token scope, boolean execute) throws ParseException {
   Token t;
   Token p;
@@ -200,19 +262,28 @@ public class Robot implements RobotConstants {
         System.out.println("Correcto");
       } else {
         System.out.println("Incorrecto, cantidad de parametros");
+        // raise error
       }
     } else {
       System.out.println("Incorrecto, no existe el procedimiento");
+      // 
     }
     {if (true) return t.image;}
     throw new Error("Missing return statement in function");
   }
 
+/*
+ * GlobalCommand:
+ * Reglas para los comandos en el bloque de instrucciones.
+ * Verifica que el comando exista y que los parametros sean correctos,
+ * ademas de agregar los comandos a la lista de comandos del procedimiento.
+ *
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ */
   final public void globalCommand(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
-  ArrayList<String> commands = new ArrayList<String>();
-  String s;
-    s = command(localScope, scope, execute);
-    commands.add(s);
+    command(localScope, scope, execute);
     label_5:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -224,42 +295,50 @@ public class Robot implements RobotConstants {
         break label_5;
       }
       jj_consume_token(SC);
-      s = command(localScope, scope ,execute);
-    commands.add(s);
+      command(localScope, scope ,execute);
     }
-    procCommands.put(scope.image, commands);
   }
 
-  final public String command(ArrayList <String > localScope, Token scope ,boolean execute) throws ParseException {
-  String s;
+/*
+ * Command:
+ * Reglas para los comandos en el bloque de instrucciones.
+ * Verifica que el comando exista y que los parametros sean correctos.
+ * el comando se ejecuta si el procedimiento se ejecuta.
+ *
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ * return: String que contiene el nombre del comando
+ */
+  final public void command(ArrayList <String > localScope, Token scope ,boolean execute) throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case DROP:
     case GRAB:
     case GET:
     case FREE:
     case POP:
-      s = posibleCommands(localScope, scope, execute);
+      posibleCommands(localScope, scope, execute);
       break;
     case JUMPTO:
-      s = jumpTo(localScope, scope, execute);
+      jumpTo(localScope, scope, execute);
       break;
     case VEER:
-      s = veer();
+      veer(scope, execute);
       break;
     case LOOK:
-      s = look();
+      look(scope, execute);
       break;
     case WALK:
-      s = walk(localScope, scope, execute);
+      walk(localScope, scope, execute);
       break;
     case CONSTANT:
     case WORD:
       if (jj_2_1(2)) {
-        s = assignment(localScope, scope, execute);
+        assignment(localScope, scope, execute);
       } else {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case WORD:
-          s = rules(localScope, scope, execute);
+          rules(localScope, scope, execute);
           break;
         default:
           jj_la1[8] = jj_gen;
@@ -269,25 +348,37 @@ public class Robot implements RobotConstants {
       }
       break;
     case IF:
-      s = ifBlock(localScope, scope, execute);
+      ifBlock(localScope, scope, execute);
       break;
     case WHILE:
-      s = whileBlock(localScope, scope, execute);
+      whileBlock(localScope, scope, execute);
       break;
     case REPEAT:
-      s = repeatBlock(localScope, scope, execute);
+      repeatBlock(localScope, scope, execute);
       break;
     default:
       jj_la1[9] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
-    {if (true) return s;}
-    throw new Error("Missing return statement in function");
   }
 
-  final public String posibleCommands(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
+/*
+ * PosibleCommands:
+ *
+ * Agrupa los comandos que requieren de un parametro de tipo entero.
+ *
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ * return: String que contiene el nombre del comando
+ */
+  final public void posibleCommands(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
   Token t;
+  // hashmap que contiene como llave el nombre del comando y como valor un arreglo con los parametros
+  HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
+  ArrayList <String> params = new ArrayList<String>();
+  Token p;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case DROP:
       t = jj_consume_token(DROP);
@@ -310,12 +401,31 @@ public class Robot implements RobotConstants {
       throw new ParseException();
     }
     jj_consume_token(PI);
-    parameter(localScope, true);
+    p = parameter(localScope, true);
     jj_consume_token(PD);
-    {if (true) return t.image;}
-    throw new Error("Missing return statement in function");
+    if (execute){
+      System.out.println(t.image + " " + p.image);
+    } else {
+      params.add(p.image);
+      hashmapComandos.put(t.image, params);
+      System.out.println(hashmapComandos);
+      System.out.println(scope.image);
+      System.out.println(procCommands);
+      procCommands.get(scope.image).add(hashmapComandos);
+    }
   }
 
+/*
+ * parameter:
+ * Reglas para los parametros de los comandos.
+ * Verifica que el parametro sea correcto.
+ * Si el parametro es una variable, verifica que exista.
+ * Si el parametro es un entero, verifica que sea un entero y que el comando acepte enteros (allowInt).
+ *
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param allowInt: booleano que indica si el parametro puede ser un entero
+ * return: Token que contiene el parametro
+ */
   final public Token parameter(ArrayList <String > localScope, boolean allowInt) throws ParseException {
   Token t;
   Token d;
@@ -350,57 +460,99 @@ public class Robot implements RobotConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public String jumpTo(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
+/*
+ * jumpTo:
+ * Reglas para el comando jumpTo.
+ * 
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ * return: String que contiene el nombre del comando (jumpTo)
+ */
+  final public void jumpTo(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
   Token t;
+  Token p1;
+  Token p2;
+  // hashmap que contiene como llave el nombre del comando y como valor un arreglo con los parametros
+  HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
+  ArrayList <String> params = new ArrayList<String>();
     t = jj_consume_token(JUMPTO);
     jj_consume_token(PI);
-    parameter(localScope, true);
+    p1 = parameter(localScope, true);
     jj_consume_token(CM);
-    parameter(localScope, true);
+    p2 = parameter(localScope, true);
     jj_consume_token(PD);
-    {if (true) return t.image;}
-    throw new Error("Missing return statement in function");
+    if (execute){
+      System.out.println(t.image + " " + p1.image + " " + p2.image);
+    } else {
+      params.add(p1.image);
+      params.add(p2.image);
+      hashmapComandos.put(t.image, params);
+      procCommands.get(scope.image).add(hashmapComandos);
+
+    }
   }
 
-  final public void posibleDirections() throws ParseException {
+/*
+ * posibleDirections:
+ * Lista de direcciones posibles para el comando veer.
+ */
+  final public Token posibleDirections() throws ParseException {
+  Token t;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case AROUND:
-      jj_consume_token(AROUND);
+      t = jj_consume_token(AROUND);
       break;
     case LEFT:
-      jj_consume_token(LEFT);
+      t = jj_consume_token(LEFT);
       break;
     case RIGHT:
-      jj_consume_token(RIGHT);
+      t = jj_consume_token(RIGHT);
       break;
     default:
       jj_la1[12] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
+    {if (true) return t;}
+    throw new Error("Missing return statement in function");
   }
 
-  final public void posibleOrientations() throws ParseException {
+/*
+ * posibleOrientations:
+ * Lista de orientaciones posibles para el comando look o walk.
+ */
+
+
+// posibleOrientations with return of token
+  final public Token posibleOrientations() throws ParseException {
+  Token t;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case NORTH:
-      jj_consume_token(NORTH);
+      t = jj_consume_token(NORTH);
       break;
     case SOUTH:
-      jj_consume_token(SOUTH);
+      t = jj_consume_token(SOUTH);
       break;
     case EAST:
-      jj_consume_token(EAST);
+      t = jj_consume_token(EAST);
       break;
     case WEST:
-      jj_consume_token(WEST);
+      t = jj_consume_token(WEST);
       break;
     default:
       jj_la1[13] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
+    {if (true) return t;}
+    throw new Error("Missing return statement in function");
   }
 
+/*
+ * posibleWalks:
+ * Lista de direcciones posibles para el comando walk.
+ */
   final public void posibleWalks() throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case FRONT:
@@ -422,27 +574,66 @@ public class Robot implements RobotConstants {
     }
   }
 
-  final public String veer() throws ParseException {
+/*
+ * veer:
+ * Reglas para el comando veer.
+ *
+ * return: String que contiene el nombre del comando (veer)
+ */
+  final public void veer(Token scope, boolean execute) throws ParseException {
   Token t;
+  Token d;
+  // hashmap que contiene como llave el nombre del comando y como valor un arreglo con los parametros
+  HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
+  ArrayList <String> params = new ArrayList<String>();
     t = jj_consume_token(VEER);
     jj_consume_token(PI);
-    posibleDirections();
+    d = posibleDirections();
     jj_consume_token(PD);
-    {if (true) return t.image;}
-    throw new Error("Missing return statement in function");
+    if (execute){
+      System.out.println(t.image + " " + d.image);
+    } else {
+      params.add(d.image);
+      hashmapComandos.put(t.image, params);
+      procCommands.get(scope.image).add(hashmapComandos);
+    }
   }
 
-// look with return of String
-  final public String look() throws ParseException {
+/*
+ * look:
+ * Reglas para el comando look.
+ *
+ * return: String que contiene el nombre del comando (look)
+ */
+  final public void look(Token scope, boolean execute) throws ParseException {
   Token t;
+  Token o;
+  // hashmap que contiene como llave el nombre del comando y como valor un arreglo con los parametros
+  HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
+  ArrayList <String> params = new ArrayList<String>();
     t = jj_consume_token(LOOK);
     jj_consume_token(PI);
-    posibleOrientations();
+    o = posibleOrientations();
     jj_consume_token(PD);
-    {if (true) return t.image;}
-    throw new Error("Missing return statement in function");
+    if (execute){
+      System.out.println(t.image + " " + o.image);
+    } else {
+      params.add(o.image);
+      hashmapComandos.put(t.image, params);
+      procCommands.get(scope.image).add(hashmapComandos);
+    }
   }
 
+/*
+ * walk:
+ * Reglas para el comando walk.
+ * 
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ * 
+ * return: String que contiene el nombre del comando (walk)
+ */
   final public String walk(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
   Token t;
     t = jj_consume_token(WALK);
@@ -453,6 +644,15 @@ public class Robot implements RobotConstants {
     throw new Error("Missing return statement in function");
   }
 
+/*
+ * walksTypes:
+ * Agrupa las variantes del comando walk segun los parametros.
+ * 
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ * 
+ */
   final public void walksTypes(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case CONSTANT:
@@ -482,23 +682,53 @@ public class Robot implements RobotConstants {
     }
   }
 
+/*
+ * assignmment:
+ * Reglas para el comando de asignacion.
+ * 
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ * 
+ * return: String que contiene el nombre de la variable
+ */
   final public String assignment(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
   Token t;
   Token n;
     t = parameter(localScope, false);
     jj_consume_token(ASSIGNMENT);
     n = jj_consume_token(CONSTANT);
-    globalScope.put(t.image, Integer.parseInt(n.image));
+    if (execute){
+      if (localScope.contains(t.image)){
+        localScope.set(localScope.indexOf(t.image), n.image);
+      } else if (varNames.contains(t.image)){
+        globalScope.put(t.image, Integer.parseInt(n.image));
+      } else {
+        System.out.println("Variable no declarada:" + t.image);
+      }
+    }
     {if (true) return t.image;}
     throw new Error("Missing return statement in function");
   }
 
+/*
+ * terminalBlock:
+ * Agrupa los comandos terminales para ser utilizados en las estructuras de control.
+ *
+ * @param localScope: arreglo que contiene las variables locales del procedimiento
+ * @param scope: token que contiene el nombre del procedimiento
+ * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ */
   final public void terminalBlock(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
     jj_consume_token(CBL);
     globalCommand(localScope, scope, execute);
     jj_consume_token(CBR);
   }
 
+/*
+ * validList:
+ * Agrupa los comandos validos para ser utilizados por la condicion isValid de las estructuras de control.
+ */
   final public void validList() throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case WALK:
@@ -529,6 +759,10 @@ public class Robot implements RobotConstants {
     }
   }
 
+/*
+ * isFacing:
+ * Reglas para la condicion isFacing.
+ */
   final public void isFacing() throws ParseException {
     jj_consume_token(ISFACING);
     jj_consume_token(PI);
@@ -536,6 +770,7 @@ public class Robot implements RobotConstants {
     jj_consume_token(PD);
   }
 
+// por favor documentar el resto de las reglas
   final public void isValid(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
     jj_consume_token(ISVALID);
     jj_consume_token(PI);
@@ -673,6 +908,12 @@ public class Robot implements RobotConstants {
     finally { jj_save(0, xla); }
   }
 
+  private boolean jj_3R_6() {
+    if (jj_3R_7()) return true;
+    if (jj_scan_token(ASSIGNMENT)) return true;
+    return false;
+  }
+
   private boolean jj_3R_9() {
     if (jj_scan_token(CONSTANT)) return true;
     return false;
@@ -695,12 +936,6 @@ public class Robot implements RobotConstants {
 
   private boolean jj_3_1() {
     if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_6() {
-    if (jj_3R_7()) return true;
-    if (jj_scan_token(ASSIGNMENT)) return true;
     return false;
   }
 

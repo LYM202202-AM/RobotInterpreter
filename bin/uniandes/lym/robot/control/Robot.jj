@@ -43,8 +43,8 @@ public class Robot
 	static HashMap<String, ArrayList<String>> procParams = new HashMap<String, ArrayList<String>>();
   // globalScope es un HashMap que contiene como llave el nombre de la variable y como valor su entero asociado
   static HashMap<String, Integer > globalScope = new HashMap<String, Integer>();
-  // procCommands es un HashMap que contiene como llave el nombre de un procedimiento y como valor una lista de comandos
-  static HashMap<String, ArrayList<String> > procCommands = new HashMap<String, ArrayList<> >();
+  // procCommands es un HashMap que contiene como llave el nombre de un procedimiento y como valor un hashmap que contiene como llave el nombre del comando y como valor un arreglo de Strings con los parametros del comando
+  static HashMap<String, ArrayList<HashMap<String, ArrayList<String>>>> procCommands = new HashMap<String,  ArrayList<HashMap<String, ArrayList<String>>>>();
 	private RobotWorldDec world;
 	
 	
@@ -268,20 +268,24 @@ Token saveLocalNamesxType(ArrayList <String > localScope, String procN): /*Arreg
  * return: un token que contiene el nombre del procedimiento
  */
 
-Token procDef():
+void procDef():
 {
 	ArrayList <String > localScope = new ArrayList<String>();
 	Token scope;
   boolean execute = false;
+  // Arraylist que contiene hashmaps donde la llave es el nombre del comando y el valor es un arreglo con los parametros
+  ArrayList<HashMap<String, ArrayList<String>>> listaMapaComandos = new ArrayList<HashMap<String, ArrayList<String>>>();
 }
 {
-	< PROC > scope=saveGlobalNamesxType("PROC") < PI > (saveLocalNamesxType(localScope, scope.image) (< CM > saveLocalNamesxType(localScope, scope.image))*)? < PD >
-	insBlock(localScope, scope, execute) < CORP >
-	{
+	< PROC > scope=saveGlobalNamesxType("PROC")
+  {
 	  System.out.println(scope.image);
 	  System.out.println(localScope);
-    return scope;
+    procCommands.put(scope.image, listaMapaComandos);
 	}
+  < PI > (saveLocalNamesxType(localScope, scope.image) (< CM > saveLocalNamesxType(localScope, scope.image))*)? < PD >
+	insBlock(localScope, scope, execute) < CORP >
+
 }
 
 /*
@@ -336,9 +340,11 @@ String rules(ArrayList <String> localScope, Token scope, boolean execute):
         System.out.println("Correcto");
       } else {
         System.out.println("Incorrecto, cantidad de parametros");
+        // raise error
       }
     } else {
       System.out.println("Incorrecto, no existe el procedimiento");
+      // 
     }
     return t.image;
   }
@@ -357,18 +363,9 @@ String rules(ArrayList <String> localScope, Token scope, boolean execute):
 
 void globalCommand(ArrayList <String > localScope, Token scope, boolean execute):
 {
-  ArrayList<String> commands = new ArrayList<String>();
-  String s;
 }
 {
-	s=command(localScope, scope, execute){
-    commands.add(s);
-  }(< SC > s=command(localScope, scope ,execute){
-    commands.add(s);
-  })*
-  {
-    procCommands.put(scope.image, commands);
-  }
+	command(localScope, scope, execute)(< SC > command(localScope, scope ,execute))*
 }
 
 /*
@@ -383,30 +380,26 @@ void globalCommand(ArrayList <String > localScope, Token scope, boolean execute)
  * return: String que contiene el nombre del comando
  */
 
-String command(ArrayList <String > localScope, Token scope ,boolean execute):
+void command(ArrayList <String > localScope, Token scope ,boolean execute):
 {
-  String s;
 }
 {
   (
-  s=posibleCommands(localScope, scope, execute)
-  | s=jumpTo(localScope, scope, execute)
-  | s=veer()
-  | s=look()
-  | s=walk(localScope, scope, execute)
+  posibleCommands(localScope, scope, execute)
+  | jumpTo(localScope, scope, execute)
+  | veer(scope, execute)
+  | look(scope, execute)
+  | walk(localScope, scope, execute)
   |
   (
   LOOKAHEAD(2)
-  s=assignment(localScope, scope, execute)
-  | s=rules(localScope, scope, execute)
+  assignment(localScope, scope, execute)
+  | rules(localScope, scope, execute)
   )
-  | s=ifBlock(localScope, scope, execute)
-  | s=whileBlock(localScope, scope, execute)
-  | s=repeatBlock(localScope, scope, execute)
+  | ifBlock(localScope, scope, execute)
+  | whileBlock(localScope, scope, execute)
+  | repeatBlock(localScope, scope, execute)
   )
-  {
-    return s;
-  }
 }
 
 /*
@@ -420,17 +413,30 @@ String command(ArrayList <String > localScope, Token scope ,boolean execute):
  * return: String que contiene el nombre del comando
  */
 
-String posibleCommands(ArrayList <String > localScope, Token scope, boolean execute):
+void posibleCommands(ArrayList <String > localScope, Token scope, boolean execute):
 {
   Token t;
+  // hashmap que contiene como llave el nombre del comando y como valor un arreglo con los parametros
+  HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
+  ArrayList <String> params = new ArrayList<String>();
+  Token p;
 }
 {
   (
     t=< DROP > | t=< GRAB > | t=< GET > | t=< FREE > | t=< POP >
   )
-  < PI > parameter(localScope, true) < PD >
+  < PI > p=parameter(localScope, true) < PD >
   {
-    return t.image;
+    if (execute){
+      System.out.println(t.image + " " + p.image);
+    } else {
+      params.add(p.image);
+      hashmapComandos.put(t.image, params);
+      System.out.println(hashmapComandos);
+      System.out.println(scope.image);
+      System.out.println(procCommands);
+      procCommands.get(scope.image).add(hashmapComandos);
+    }
   }
 }
 
@@ -487,14 +493,27 @@ Token parameter(ArrayList <String > localScope, boolean allowInt):
  * return: String que contiene el nombre del comando (jumpTo)
  */
 
-String jumpTo(ArrayList <String > localScope, Token scope, boolean execute):
+void jumpTo(ArrayList <String > localScope, Token scope, boolean execute):
 {
   Token t;
+  Token p1;
+  Token p2;
+  // hashmap que contiene como llave el nombre del comando y como valor un arreglo con los parametros
+  HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
+  ArrayList <String> params = new ArrayList<String>();
 }
 {
-  t=< JUMPTO > < PI > parameter(localScope, true) < CM > parameter(localScope, true) < PD >
+  t=< JUMPTO > < PI > p1=parameter(localScope, true) < CM > p2=parameter(localScope, true) < PD >
   {
-    return t.image;
+    if (execute){
+      System.out.println(t.image + " " + p1.image + " " + p2.image);
+    } else {
+      params.add(p1.image);
+      params.add(p2.image);
+      hashmapComandos.put(t.image, params);
+      procCommands.get(scope.image).add(hashmapComandos);
+
+    }
   }
 }
 
@@ -503,10 +522,15 @@ String jumpTo(ArrayList <String > localScope, Token scope, boolean execute):
  * Lista de direcciones posibles para el comando veer.
  */
 
-void posibleDirections():
-{}
+Token posibleDirections():
 {
-  < AROUND > | < LEFT > | < RIGHT >
+  Token t;
+}
+{
+  (t=< AROUND > | t=< LEFT > | t=< RIGHT >)
+  {
+    return t;
+  }
 }
 
 /*
@@ -514,11 +538,19 @@ void posibleDirections():
  * Lista de orientaciones posibles para el comando look o walk.
  */
 
-void posibleOrientations():
-{}
+
+// posibleOrientations with return of token
+Token posibleOrientations():
 {
-  < NORTH > | < SOUTH > | < EAST > | < WEST >
+  Token t;
 }
+{
+  (t=< NORTH > | t=< SOUTH > | t=< EAST > | t=< WEST >)
+  {
+    return t;
+  }
+}
+
 
 /*
  * posibleWalks:
@@ -538,14 +570,24 @@ void posibleWalks():
  * return: String que contiene el nombre del comando (veer)
  */
 
-String veer():
+void veer(Token scope, boolean execute):
 {
   Token t;
+  Token d;
+  // hashmap que contiene como llave el nombre del comando y como valor un arreglo con los parametros
+  HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
+  ArrayList <String> params = new ArrayList<String>();
 }
 {
-  t=< VEER > < PI > posibleDirections() < PD >
+  t=< VEER > < PI > d=posibleDirections() < PD >
   {
-    return t.image;
+    if (execute){
+      System.out.println(t.image + " " + d.image);
+    } else {
+      params.add(d.image);
+      hashmapComandos.put(t.image, params);
+      procCommands.get(scope.image).add(hashmapComandos);
+    }
   }
 }
 
@@ -555,14 +597,24 @@ String veer():
  *
  * return: String que contiene el nombre del comando (look)
  */
-String look():
+void look(Token scope, boolean execute):
 {
   Token t;
+  Token o;
+  // hashmap que contiene como llave el nombre del comando y como valor un arreglo con los parametros
+  HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
+  ArrayList <String> params = new ArrayList<String>();
 }
 {
-  t=< LOOK > < PI > posibleOrientations() < PD >
+  t=< LOOK > < PI > o=posibleOrientations() < PD >
   {
-    return t.image;
+    if (execute){
+      System.out.println(t.image + " " + o.image);
+    } else {
+      params.add(o.image);
+      hashmapComandos.put(t.image, params);
+      procCommands.get(scope.image).add(hashmapComandos);
+    }
   }
 }
 
@@ -577,15 +629,12 @@ String look():
  * return: String que contiene el nombre del comando (walk)
  */
 
-String walk(ArrayList <String > localScope, Token scope, boolean execute):
+void walk(ArrayList <String > localScope, Token scope, boolean execute):
 {
-  Token t;
+
 }
 {
-  t=< WALK > < PI > walksTypes(localScope, scope, execute) < PD >
-  {
-    return t.image;
-  }
+  < WALK > < PI > walksTypes(localScope, scope, execute) < PD >
 }
 
 /*
@@ -599,11 +648,32 @@ String walk(ArrayList <String > localScope, Token scope, boolean execute):
  */
 
 void walksTypes(ArrayList <String > localScope, Token scope, boolean execute):
-{}
 {
-  parameter(localScope, true)
-  | posibleWalks() < CM > parameter(localScope, true)
-  | posibleOrientations() < CM > parameter(localScope, true)
+  // hashmap que contiene como llave el nombre del comando y como valor un arreglo con los parametros
+  HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
+  ArrayList <String> params = new ArrayList<String>();
+  Token p1;
+  Token p2;
+}
+{
+  (p1=parameter(localScope, true)
+  | p1=posibleWalks() < CM > p2=parameter(localScope, true)
+  | p1=posibleOrientations() < CM > p2=parameter(localScope, true))
+  {
+    if (execute){
+      System.out.println(t.image + " " + params);
+    } else {
+      if (p2 != null){
+        params.add(p1.image);
+        params.add(p2.image);
+      } else {
+        params.add(p1.image);
+      }
+      hashmapComandos.put(<WALK>.image, params);
+      procCommands.get(scope.image).add(hashmapComandos);
+    }
+  }
+  
 }
 
 /*
@@ -617,10 +687,12 @@ void walksTypes(ArrayList <String > localScope, Token scope, boolean execute):
  * return: String que contiene el nombre de la variable
  */
 
-String assignment(ArrayList <String > localScope, Token scope, boolean execute):
+void assignment(ArrayList <String > localScope, Token scope, boolean execute):
 {
   Token t;
   Token n;
+  HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
+  ArrayList <String> params = new ArrayList<String>();
 }
 {
   t=parameter(localScope, false) < ASSIGNMENT > n=< CONSTANT >
@@ -633,8 +705,11 @@ String assignment(ArrayList <String > localScope, Token scope, boolean execute):
       } else {
         System.out.println("Variable no declarada:" + t.image);
       }
+    } else {
+      params.add(n.image);
+      hashmapComandos.put(t.image, params);
+      procCommands.get(scope.image).add(hashmapComandos);
     }
-    return t.image;
   }
 }
 

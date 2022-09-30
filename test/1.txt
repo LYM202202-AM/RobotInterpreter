@@ -1,0 +1,23 @@
+PROG
+var n , x , y ;
+PROC putCB (c , b )
+{
+drop ( c ) ;
+free ( b ) ;
+walk ( n ) ;
+jumpTo(n,b);
+look(north);
+walk(1);
+walk(north, 2);
+walk(front, 1);
+x:=1
+
+}
+CORP
+
+{
+jumpTo (3 ,3) ;
+n := 6;
+putCB (2 ,1)
+}
+GORP
