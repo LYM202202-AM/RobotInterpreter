@@ -225,6 +225,12 @@ void program():
 
   }
   (varDef())? (procDef())* insBlock(localScope, t, false) < GORP >
+  {
+    // MANU - Aqui se debe de empezar a ejecutar el programa
+    // MANU - se recorre la lista de comandos del procedimiento principal ("PROG") en el HashMap procCommands.
+    // MANU - Te Quiero <3
+
+  }
 }
 
 /*
