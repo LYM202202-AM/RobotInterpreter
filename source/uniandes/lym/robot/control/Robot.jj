@@ -57,6 +57,7 @@ public class Robot
   static int whileCounter = 0;
   static int repeatCounter = 0;
 
+
 	private RobotWorldDec world;
 	
 	
@@ -77,6 +78,9 @@ public class Robot
         procParams.clear();
         globalScope.clear();
         procCommands.clear();
+        whileProcs.clear();
+        ifProcs.clear();
+        repeatProcs.clear();
         // ejecuta la gramatica
         parser.program();
         System.out.println("Programa leido correctamente");
@@ -860,16 +864,21 @@ void terminalBlock(ArrayList <String > localScope, Token scope, boolean execute,
  * Agrupa los comandos validos para ser utilizados por la condicion isValid de las estructuras de control.
  */
 
-void validList():
-{}
+Token validList():
 {
-  < WALK >
-  | < JUMP >
-  | < GRAB >
-  | < DROP >
-  | < PICK >
-  | < FREE >
-  | < POP >
+  Token t;
+}
+{
+  (t=< WALK >
+  | t=< JUMP >
+  | t=< GRAB >
+  | t=< DROP >
+  | t=< PICK >
+  | t=< FREE >
+  | t=< POP >)
+  {
+    return t;
+  }
 }
 
 /*
@@ -877,38 +886,94 @@ void validList():
  * Reglas para la condicion isFacing.
  */
 
-void isFacing():
-{}
+void isFacing(Token scope, boolean execute, String estructura, boolean not):
 {
-  < ISFACING > < PI > posibleOrientations() < PD >
+  Token t;
+  Token o;
+  HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
+  ArrayList <String> params = new ArrayList<String>();
 }
+{
+  t=< ISFACING > < PI > o=posibleOrientations() < PD >
+  {
+    String condition = t.image;
+    if (not){
+      condition = "not " + condition;
+    }
+    if (execute){
+      System.out.println(condition + " " + o.image);
+    } else {
+      params.add(o.image);
+      guardarInfo(condition, params, scope, estructura);
+    }
+  }
+}
+
 
 // por favor documentar el resto de las reglas
 
-void isValid(ArrayList <String > localScope, Token scope, boolean execute, String estructura):
-{}
+void isValid(ArrayList <String > localScope, Token scope, boolean execute, String estructura, boolean not):
 {
-  < ISVALID > < PI > validList() < CM > parameter(localScope, true) < PD >
+  Token t;
+  Token o;
+  HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
+  ArrayList <String> params = new ArrayList<String>();
+  Token d;
+}
+{
+  t=< ISVALID > < PI > o=validList() < CM > d=parameter(localScope, true) < PD >
+  {
+    String condition = t.image;
+    if (not){
+      condition = "not"+t.image;
+    }
+    if (execute){
+      System.out.println(condition + " " + o.image + " " + d.image);
+    } else {
+      params.add(o.image);
+      params.add(d.image);
+      guardarInfo(condition, params, scope, estructura);
+    }
+  }
 }
 
-void canWalk(ArrayList <String > localScope, Token scope, boolean execute, String estructura):
-{}
+void canWalk(ArrayList <String > localScope, Token scope, boolean execute, String estructura, boolean not):
 {
-  < CANWALK > < PI > (posibleOrientations()| posibleWalks()) < CM > parameter(localScope, true) < PD >
+  Token t;
+  Token o;
+  Token d;
+  HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
+  ArrayList <String> params = new ArrayList<String>();
+}
+{
+  t=< CANWALK > < PI > (o=posibleOrientations()| o=posibleWalks()) < CM > d=parameter(localScope, true) < PD >
+  {
+    String condition = t.image;
+    if (not){
+      condition = "not"+t.image;
+    }
+    if (execute){
+      System.out.println(condition + " " + o.image + " " + d.image);
+    } else {
+      params.add(o.image);
+      params.add(d.image);
+      guardarInfo(condition, params, scope, estructura);
+    }
+  }
 }
 
-void condition(ArrayList <String > localScope, Token scope, boolean execute, String estructura):
+void condition(ArrayList <String > localScope, Token scope, boolean execute, String estructura, boolean not):
 {}
 {
-  isFacing()
-  | isValid(localScope, scope,execute, estructura)
-  | canWalk(localScope, scope,execute, estructura)
+  isFacing(scope, execute, estructura, not)
+  | isValid(localScope, scope,execute, estructura, not)
+  | canWalk(localScope, scope,execute, estructura, not)
 }
 
 void not(ArrayList <String > localScope, Token scope, boolean execute, String estructura):
 {}
 {
-  < NOT > < PI > condition(localScope, scope,execute, estructura) < PD >
+  < NOT > < PI > condition(localScope, scope,execute, estructura, true) < PD >
 }
 
 void ifBlock(ArrayList <String > localScope, Token scope, boolean execute):
@@ -923,7 +988,7 @@ void ifBlock(ArrayList <String > localScope, Token scope, boolean execute):
   ifCounter++;
 }
 {
-  < IF > < PI > (not(localScope, scope, execute, estructura) | condition(localScope, scope, execute, estructura)) < PD > terminalBlock(localScope, scope, execute, estructura) ( < ELSE >terminalBlock(localScope, scope, execute, elseIndex) )? < FI >
+  < IF > < PI > (not(localScope, scope, execute, estructura) | condition(localScope, scope, execute, estructura, false)) < PD > terminalBlock(localScope, scope, execute, estructura) ( < ELSE >terminalBlock(localScope, scope, execute, elseIndex) )? < FI >
 
 }
 
@@ -937,7 +1002,7 @@ void whileBlock(ArrayList <String> localScope, Token scope, boolean execute):
   whileCounter++;
 }
 {
-  <WHILE > < PI > ( not(localScope, scope, execute, estructura) | condition(localScope, scope, execute, estructura)) < PD > < DO > terminalBlock(localScope, scope, execute, estructura) < OD >
+  <WHILE > < PI > ( not(localScope, scope, execute, estructura) | condition(localScope, scope, execute, estructura, false)) < PD > < DO > terminalBlock(localScope, scope, execute, estructura) < OD >
 }
 
 void repeatBlock(ArrayList <String> localScope, Token scope, boolean execute):
@@ -948,10 +1013,22 @@ void repeatBlock(ArrayList <String> localScope, Token scope, boolean execute):
   estructura += ","+index;
   // System.out.println("repeat");
   repeatCounter++;
+  Token n;
 }
 {
   < REPEAT >
-  parameter(localScope, true) terminalBlock(localScope, scope, execute, estructura) < PER >
+  n=parameter(localScope, true) {
+    if (!execute){
+      ArrayList <String> params = new ArrayList<String>();
+      params.add(n.image);
+      guardarInfo("repeat", params, scope, estructura);
+    }
+  } terminalBlock(localScope, scope, execute, estructura) < PER >
+  {
+    if (execute){
+      System.out.println("repeat " + n.image);
+    }
+  }
 }
 //	//boolean command(uniandes.lym.robot.view.Console sistema) :
 //	boolean command(Console sistema):

@@ -32,6 +32,7 @@ public class Robot implements RobotConstants {
   static int whileCounter = 0;
   static int repeatCounter = 0;
 
+
         private RobotWorldDec world;
 
 
@@ -52,6 +53,9 @@ public class Robot implements RobotConstants {
         procParams.clear();
         globalScope.clear();
         procCommands.clear();
+        whileProcs.clear();
+        ifProcs.clear();
+        repeatProcs.clear();
         // ejecuta la gramatica
         parser.program();
         System.out.println("Programa leido correctamente");
@@ -861,72 +865,110 @@ public class Robot implements RobotConstants {
  * validList:
  * Agrupa los comandos validos para ser utilizados por la condicion isValid de las estructuras de control.
  */
-  final public void validList() throws ParseException {
+  final public Token validList() throws ParseException {
+  Token t;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case WALK:
-      jj_consume_token(WALK);
+      t = jj_consume_token(WALK);
       break;
     case JUMP:
-      jj_consume_token(JUMP);
+      t = jj_consume_token(JUMP);
       break;
     case GRAB:
-      jj_consume_token(GRAB);
+      t = jj_consume_token(GRAB);
       break;
     case DROP:
-      jj_consume_token(DROP);
+      t = jj_consume_token(DROP);
       break;
     case PICK:
-      jj_consume_token(PICK);
+      t = jj_consume_token(PICK);
       break;
     case FREE:
-      jj_consume_token(FREE);
+      t = jj_consume_token(FREE);
       break;
     case POP:
-      jj_consume_token(POP);
+      t = jj_consume_token(POP);
       break;
     default:
       jj_la1[16] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
+    {if (true) return t;}
+    throw new Error("Missing return statement in function");
   }
 
 /*
  * isFacing:
  * Reglas para la condicion isFacing.
  */
-  final public void isFacing() throws ParseException {
-    jj_consume_token(ISFACING);
+  final public void isFacing(Token scope, boolean execute, String estructura, boolean not) throws ParseException {
+  Token t;
+  Token o;
+  HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
+  ArrayList <String> params = new ArrayList<String>();
+    t = jj_consume_token(ISFACING);
     jj_consume_token(PI);
-    posibleOrientations();
+    o = posibleOrientations();
     jj_consume_token(PD);
+    String condition = t.image;
+    if (not){
+      condition = "not " + condition;
+    }
+    if (execute){
+      System.out.println(condition + " " + o.image);
+    } else {
+      params.add(o.image);
+      guardarInfo(condition, params, scope, estructura);
+    }
   }
 
 // por favor documentar el resto de las reglas
-  final public void isValid(ArrayList <String > localScope, Token scope, boolean execute, String estructura) throws ParseException {
-    jj_consume_token(ISVALID);
+  final public void isValid(ArrayList <String > localScope, Token scope, boolean execute, String estructura, boolean not) throws ParseException {
+  Token t;
+  Token o;
+  HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
+  ArrayList <String> params = new ArrayList<String>();
+  Token d;
+    t = jj_consume_token(ISVALID);
     jj_consume_token(PI);
-    validList();
+    o = validList();
     jj_consume_token(CM);
-    parameter(localScope, true);
+    d = parameter(localScope, true);
     jj_consume_token(PD);
+    String condition = t.image;
+    if (not){
+      condition = "not"+t.image;
+    }
+    if (execute){
+      System.out.println(condition + " " + o.image + " " + d.image);
+    } else {
+      params.add(o.image);
+      params.add(d.image);
+      guardarInfo(condition, params, scope, estructura);
+    }
   }
 
-  final public void canWalk(ArrayList <String > localScope, Token scope, boolean execute, String estructura) throws ParseException {
-    jj_consume_token(CANWALK);
+  final public void canWalk(ArrayList <String > localScope, Token scope, boolean execute, String estructura, boolean not) throws ParseException {
+  Token t;
+  Token o;
+  Token d;
+  HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
+  ArrayList <String> params = new ArrayList<String>();
+    t = jj_consume_token(CANWALK);
     jj_consume_token(PI);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case NORTH:
     case SOUTH:
     case EAST:
     case WEST:
-      posibleOrientations();
+      o = posibleOrientations();
       break;
     case LEFT:
     case RIGHT:
     case FRONT:
     case BACK:
-      posibleWalks();
+      o = posibleWalks();
       break;
     default:
       jj_la1[17] = jj_gen;
@@ -934,20 +976,31 @@ public class Robot implements RobotConstants {
       throw new ParseException();
     }
     jj_consume_token(CM);
-    parameter(localScope, true);
+    d = parameter(localScope, true);
     jj_consume_token(PD);
+    String condition = t.image;
+    if (not){
+      condition = "not"+t.image;
+    }
+    if (execute){
+      System.out.println(condition + " " + o.image + " " + d.image);
+    } else {
+      params.add(o.image);
+      params.add(d.image);
+      guardarInfo(condition, params, scope, estructura);
+    }
   }
 
-  final public void condition(ArrayList <String > localScope, Token scope, boolean execute, String estructura) throws ParseException {
+  final public void condition(ArrayList <String > localScope, Token scope, boolean execute, String estructura, boolean not) throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case ISFACING:
-      isFacing();
+      isFacing(scope, execute, estructura, not);
       break;
     case ISVALID:
-      isValid(localScope, scope,execute, estructura);
+      isValid(localScope, scope,execute, estructura, not);
       break;
     case CANWALK:
-      canWalk(localScope, scope,execute, estructura);
+      canWalk(localScope, scope,execute, estructura, not);
       break;
     default:
       jj_la1[18] = jj_gen;
@@ -959,7 +1012,7 @@ public class Robot implements RobotConstants {
   final public void not(ArrayList <String > localScope, Token scope, boolean execute, String estructura) throws ParseException {
     jj_consume_token(NOT);
     jj_consume_token(PI);
-    condition(localScope, scope,execute, estructura);
+    condition(localScope, scope,execute, estructura, true);
     jj_consume_token(PD);
   }
 
@@ -981,7 +1034,7 @@ public class Robot implements RobotConstants {
     case ISFACING:
     case ISVALID:
     case CANWALK:
-      condition(localScope, scope, execute, estructura);
+      condition(localScope, scope, execute, estructura, false);
       break;
     default:
       jj_la1[19] = jj_gen;
@@ -1018,7 +1071,7 @@ public class Robot implements RobotConstants {
     case ISFACING:
     case ISVALID:
     case CANWALK:
-      condition(localScope, scope, execute, estructura);
+      condition(localScope, scope, execute, estructura, false);
       break;
     default:
       jj_la1[21] = jj_gen;
@@ -1038,10 +1091,19 @@ public class Robot implements RobotConstants {
   estructura += ","+index;
   // System.out.println("repeat");
   repeatCounter++;
+  Token n;
     jj_consume_token(REPEAT);
-    parameter(localScope, true);
+    n = parameter(localScope, true);
+    if (!execute){
+      ArrayList <String> params = new ArrayList<String>();
+      params.add(n.image);
+      guardarInfo("repeat", params, scope, estructura);
+    }
     terminalBlock(localScope, scope, execute, estructura);
     jj_consume_token(PER);
+    if (execute){
+      System.out.println("repeat " + n.image);
+    }
   }
 
   private boolean jj_2_1(int xla) {
@@ -1049,16 +1111,6 @@ public class Robot implements RobotConstants {
     try { return !jj_3_1(); }
     catch(LookaheadSuccess ls) { return true; }
     finally { jj_save(0, xla); }
-  }
-
-  private boolean jj_3_1() {
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_9() {
-    if (jj_scan_token(CONSTANT)) return true;
-    return false;
   }
 
   private boolean jj_3R_8() {
@@ -1079,6 +1131,16 @@ public class Robot implements RobotConstants {
   private boolean jj_3R_6() {
     if (jj_3R_7()) return true;
     if (jj_scan_token(ASSIGNMENT)) return true;
+    return false;
+  }
+
+  private boolean jj_3_1() {
+    if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_9() {
+    if (jj_scan_token(CONSTANT)) return true;
     return false;
   }
 
