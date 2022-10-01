@@ -300,6 +300,7 @@ void ejecutarEnOrden(String procedimientoActual, HashMap<String, Integer> scopeL
           System.out.println("Condicion del if: " + condicion);
           System.out.println("Comandos del if: " + comandosSinCondicion);
           System.out.println("Comandos del else: " + comandosDelElse);
+          
           ifs++;
           break;
         case "while":

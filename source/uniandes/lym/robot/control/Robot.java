@@ -182,6 +182,7 @@ public class Robot implements RobotConstants {
           System.out.println("Condicion del if: " + condicion);
           System.out.println("Comandos del if: " + comandosSinCondicion);
           System.out.println("Comandos del else: " + comandosDelElse);
+
           ifs++;
           break;
         case "while":
