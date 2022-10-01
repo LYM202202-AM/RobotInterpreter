@@ -12,6 +12,8 @@ import java.util.*;
 public class Robot implements RobotConstants {
   // varNames es un arreglo de Strings que contiene los nombres de las variables
   static ArrayList<String > varNames = new ArrayList<String>();
+  // varValues es un HashMap que contiene como llave y como valor Strings
+  static HashMap<String, String> varValues = new HashMap<String, String>();
   // procNames es un arreglo de Strings que contiene los nombres de los procedimientos
   static ArrayList<String > procNames = new ArrayList<String>();
   // procParams es un HashMap que contiene como llave el nombre del procedimiento y como valor un arreglo de Strings con los nombres de los parametros
@@ -118,8 +120,168 @@ public class Robot implements RobotConstants {
     }
     insBlock(localScope, t, false);
     jj_consume_token(GORP);
+    // System.out.println("****************");
+    // ArrayList<HashMap<String, ArrayList<String>>> procsListExecute = this.procCommands.get("PROG")
 
+    for (HashMap<String, ArrayList<String>> proc : this.procCommands.get("PROG"))
+    {//HashCompleto
+      for (String key : proc.keySet())
+      {//Nombre del procedimiento o variable
+        System.out.println("--------------");
+        System.out.println(key);
+        ArrayList<String> parametros = proc.get(key);
+        if (this.procNames.containsKey(key))
+          {
+            System.out.println(key);
+            System.out.println(parametros);
+            procExecution(key, parametros);
+          }
+          else if (this.varNames.contains(key))
+          {
+            //Cosas de variables 
+            this.varValues.put(key, parametros[0]);
+          }
+        }
+      }
   }
+
+  // void procExecution(String procName, ArrayList<String> params):
+  // {
+  // }
+  // {
+  //   for (HashMap<String, ArrayList<String>> proc : this.procCommands.get(procName))
+  //   {//HashCompleto
+  //     for (String key : proc.keySet()) 
+  //     {//Nombre del procedimiento o variable
+  //       switch(key)
+  //       {
+  //         case "walk":
+  //           walkExecution(params);
+  //           salida = 
+  //           break;
+  //         case "drop":
+  //           if (params.size() == 1)
+  //           {
+  //             world.putChips(int(params[0]));
+  //             salida = "Command: Drop" + params[0] + " chips"; 
+  //           }
+  //           break;
+  //       }
+  //       sistema.printOutput(salida);
+  //     }
+  //   }
+  // }
+
+  // String walkExecution(ArrayList<String> params):
+  // {}
+  // {
+  //   if (params.size() == 1)
+  //   {
+  //     world.moveForward(int(params[0]), false);
+  //     salida = "Command: Walk " + params[0]; + " steps";
+  //   }
+  //   else if (params.size() == 2)
+  //   {
+  //     ArrayList<String> dirParams = new ArrayList<String>();
+  //     dirParams.add("front");
+  //     dirParams.add("back");
+  //     dirParams.add("left");
+  //     dirParams.add("right");
+
+  //     ArrayList<String> orParams = new ArrayList<String>();
+  //     orParams.add("north");
+  //     orParams.add("south");
+  //     orParams.add("east");
+  //     orParams.add("west");
+
+  //     if dirParams.contains(params[0])
+  //     {
+  //       if (params[0] == "front")
+  //       {
+  //         world.moveVertically(int(params[0]), false);
+  //         salida = "Command: Walk " + params[0]; + " steps to the front";
+  //       } 
+  //       else if (params[0] == "back")
+  //       {
+  //         world.moveVertically(int(params[0])*-1, true);
+  //         salida = "Command: Walk " + params[0]; + " steps to the back";
+  //       }
+  //       else if (params[0] == "left")
+  //       {
+  //         world.moveHorizontally(int(params[0])*-1, true);
+  //         salida = "Command: Walk " + params[0]; + " steps to the left";
+  //       }
+  //       else if (params[0] == "right")
+  //       {
+  //         world.moveHorizontally(int(params[0]), false);
+  //         salida = "Command: Walk " + params[0]; + " steps to the right";
+  //       }
+  //     else if orParams.contains(params[0])
+  //     {
+  //       if (params[0] == "north")
+  //       {
+  //         correctOr = correctOr(0, false);
+  //         if correctOr
+  //         {
+  //           world.moveForward()
+
+  //         }
+  //         salida += params[0]; + " steps to the north";
+  //     }
+  //   }
+  //   return salida;
+  // }
+
+  // Boolean correctOr(int direction, Boolean correct):
+  // {}
+  // {
+  //   if (correct)
+  //   {
+  //     return correct;
+  //   }
+  //   else
+  //   {
+  //     if (world.getFacing() == direction)
+  //     {
+  //       correct = true;
+  //     }
+  //     else
+  //     {
+  //       world.turnRight();
+  //       if direction < 3
+  //       {
+  //         direction ++;
+  //       }
+  //       else
+  //       { 
+  //         direction = 0;
+  //       }
+
+  //     }
+  //     correctOr(direction, correct);
+  //     return correct;
+  //   }
+  // }
+
+
+
+
+
+
+
+    // for (HashMap<String, ArrayList<String>> procMaps: procsList)
+    // {
+    //   // for (String procName: procMaps.keySet())
+    //   // {
+    //   //   System.out.prinln(procName)
+    //   // }
+    // }
+
+    // MANU - Aqui se debe de empezar a ejecutar el programa
+    // MANU - se recorre la lista de comandos del procedimiento principal ("PROG") en el HashMap procCommands.
+    // MANU - Te Quiero <3
+
+
 
 /*
  * Definicion de variables
@@ -1136,6 +1298,11 @@ public class Robot implements RobotConstants {
     finally { jj_save(0, xla); }
   }
 
+  private boolean jj_3R_9() {
+    if (jj_scan_token(CONSTANT)) return true;
+    return false;
+  }
+
   private boolean jj_3R_8() {
     if (jj_scan_token(WORD)) return true;
     return false;
@@ -1159,11 +1326,6 @@ public class Robot implements RobotConstants {
 
   private boolean jj_3_1() {
     if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_9() {
-    if (jj_scan_token(CONSTANT)) return true;
     return false;
   }
 
