@@ -218,7 +218,13 @@ void program():
   Token t;
 }
 {
-	t=< PROG > (varDef())? (procDef())* insBlock(localScope, t, true) < GORP >
+	t=< PROG >
+  {
+    ArrayList<HashMap<String, ArrayList<String>>> listaMapaComandos = new ArrayList<HashMap<String, ArrayList<String>>>();
+    procCommands.put(t.image, listaMapaComandos);
+
+  }
+  (varDef())? (procDef())* insBlock(localScope, t, false) < GORP >
 }
 
 /*
@@ -327,9 +333,15 @@ void procDef():
 void insBlock(ArrayList <String> localScope, Token scope, boolean execute):
 {
   String estructura = "procedure";
+  ArrayList<HashMap<String, ArrayList<String>>> listaMapaComandos = new ArrayList<HashMap<String, ArrayList<String>>>();
 }
 {
   < CBL > globalCommand(localScope, scope, execute, estructura) < CBR >
+  {
+    if (scope.image == "PROG") {
+      procCommands.put(scope.image, listaMapaComandos);
+    }
+  }
 }
 
 /*
@@ -338,7 +350,7 @@ void insBlock(ArrayList <String> localScope, Token scope, boolean execute):
  *
  * @param localScope: arreglo que contiene las variables locales del procedimiento
  * @param scope: token que contiene el nombre del procedimiento
- * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ * @param execute : booleano que indica si el procedimiento se ejecuta o no
  * return: String que contiene el nombre del procedimiento
  */
 
@@ -360,6 +372,9 @@ String rules(ArrayList <String> localScope, Token scope, boolean execute, String
   {
     if (procNames.contains(t.image)){
       if (procParams.get(t.image).size() == params.size()){
+        if (!execute){
+          guardarInfo(t.image, params, scope, estructura);
+        }
         // System.out.println("Correcto");
       } else {
         System.out.println("Incorrecto, cantidad de parametros");

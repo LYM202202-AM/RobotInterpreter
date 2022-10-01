@@ -89,6 +89,8 @@ public class Robot implements RobotConstants {
   ArrayList<String> localScope = new ArrayList<String>();
   Token t;
     t = jj_consume_token(PROG);
+    ArrayList<HashMap<String, ArrayList<String>>> listaMapaComandos = new ArrayList<HashMap<String, ArrayList<String>>>();
+    procCommands.put(t.image, listaMapaComandos);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case VAR:
       varDef();
@@ -109,7 +111,7 @@ public class Robot implements RobotConstants {
       }
       procDef();
     }
-    insBlock(localScope, t, true);
+    insBlock(localScope, t, false);
     jj_consume_token(GORP);
   }
 
@@ -235,9 +237,13 @@ public class Robot implements RobotConstants {
  */
   final public void insBlock(ArrayList <String> localScope, Token scope, boolean execute) throws ParseException {
   String estructura = "procedure";
+  ArrayList<HashMap<String, ArrayList<String>>> listaMapaComandos = new ArrayList<HashMap<String, ArrayList<String>>>();
     jj_consume_token(CBL);
     globalCommand(localScope, scope, execute, estructura);
     jj_consume_token(CBR);
+    if (scope.image == "PROG") {
+      procCommands.put(scope.image, listaMapaComandos);
+    }
   }
 
 /*
@@ -246,7 +252,7 @@ public class Robot implements RobotConstants {
  *
  * @param localScope: arreglo que contiene las variables locales del procedimiento
  * @param scope: token que contiene el nombre del procedimiento
- * @param execute: booleano que indica si el procedimiento se ejecuta o no
+ * @param execute : booleano que indica si el procedimiento se ejecuta o no
  * return: String que contiene el nombre del procedimiento
  */
   final public String rules(ArrayList <String> localScope, Token scope, boolean execute, String estructura) throws ParseException {
@@ -282,6 +288,9 @@ public class Robot implements RobotConstants {
     jj_consume_token(PD);
     if (procNames.contains(t.image)){
       if (procParams.get(t.image).size() == params.size()){
+        if (!execute){
+          guardarInfo(t.image, params, scope, estructura);
+        }
         // System.out.println("Correcto");
       } else {
         System.out.println("Incorrecto, cantidad de parametros");
@@ -1113,6 +1122,16 @@ public class Robot implements RobotConstants {
     finally { jj_save(0, xla); }
   }
 
+  private boolean jj_3_1() {
+    if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_9() {
+    if (jj_scan_token(CONSTANT)) return true;
+    return false;
+  }
+
   private boolean jj_3R_8() {
     if (jj_scan_token(WORD)) return true;
     return false;
@@ -1131,16 +1150,6 @@ public class Robot implements RobotConstants {
   private boolean jj_3R_6() {
     if (jj_3R_7()) return true;
     if (jj_scan_token(ASSIGNMENT)) return true;
-    return false;
-  }
-
-  private boolean jj_3_1() {
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_9() {
-    if (jj_scan_token(CONSTANT)) return true;
     return false;
   }
 
