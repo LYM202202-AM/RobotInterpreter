@@ -57,12 +57,13 @@ public class Robot
   static int whileCounter = 0;
   static int repeatCounter = 0;
 
+  static HashMap<String, ArrayList<String>> orden = new HashMap<String, ArrayList<String>>();
 
 	private RobotWorldDec world;
 	
 	
 	void setWorld(RobotWorld w) {
-		world = (RobotWorldDec) w;	
+		world = (RobotWorldDec) w;
 	}
 
 	public static void main(String args[]) throws ParseException, IOException{
@@ -81,6 +82,7 @@ public class Robot
         whileProcs.clear();
         ifProcs.clear();
         repeatProcs.clear();
+        orden.clear();
         // ejecuta la gramatica
         parser.program();
         System.out.println("Programa leido correctamente");
@@ -92,6 +94,7 @@ public class Robot
         System.out.println("While: " + whileProcs);
         System.out.println("If: " + ifProcs);
         System.out.println("Repeat: " + repeatProcs);
+        System.out.println("Orden: " + orden);
       }
       catch (ParseException e) {
         System.out.println(e.getMessage());
@@ -215,6 +218,7 @@ TOKEN: // simbolos
 void program():
 {
   ArrayList<String> localScope = new ArrayList<String>();
+  ArrayList<String> ordenLocal = new ArrayList<String>();
   Token t;
 }
 {
@@ -222,9 +226,16 @@ void program():
   {
     ArrayList<HashMap<String, ArrayList<String>>> listaMapaComandos = new ArrayList<HashMap<String, ArrayList<String>>>();
     procCommands.put(t.image, listaMapaComandos);
+    orden.put(t.image, ordenLocal);
 
   }
   (varDef())? (procDef())* insBlock(localScope, t, false) < GORP >
+  {
+    // MANU - Aqui se debe de empezar a ejecutar el programa
+    // MANU - se recorre la lista de comandos del procedimiento principal ("PROG") en el HashMap procCommands.
+    // MANU - Te Quiero <3
+
+  }
 }
 
 /*
@@ -310,6 +321,7 @@ void procDef():
 	  // System.out.println(scope.image);
 	  // System.out.println(localScope);
     procCommands.put(scope.image, listaMapaComandos);
+    orden.put(scope.image, new ArrayList<String>());
 	}
   < PI > (saveLocalNamesxType(localScope, scope.image) (< CM > saveLocalNamesxType(localScope, scope.image))*)? < PD >
 	insBlock(localScope, scope, execute) < CORP >
@@ -470,6 +482,7 @@ void guardarInfo(String t, ArrayList <String> params, Token scope, String estruc
       case "procedure":
         hashmapComandos.put(t, params);
         procCommands.get(scope.image).add(hashmapComandos);
+        orden.get(scope.image).add(estructura);
         break;
       case "if":
         if (ifProcs.get(scope.image) == null){
@@ -478,12 +491,14 @@ void guardarInfo(String t, ArrayList <String> params, Token scope, String estruc
           ArrayList<HashMap<String, ArrayList<String>>> temp = new ArrayList<HashMap<String, ArrayList<String>>>();
           temp.add(hashmapComandos);
           ifProcs.get(scope.image).get(index).put("if", temp);
+          orden.get(scope.image).add(estructura);
           // System.out.println(ifProcs.get(scope.image).get(index));
         } else if (ifProcs.get(scope.image).size() <= index){
           ifProcs.get(scope.image).add(new HashMap<String,ArrayList<HashMap<String, ArrayList<String>>>>());
           ArrayList<HashMap<String, ArrayList<String>>> temp = new ArrayList<HashMap<String, ArrayList<String>>>();
           temp.add(hashmapComandos);
           ifProcs.get(scope.image).get(index).put("if", temp);
+          orden.get(scope.image).add(estructura);
           // System.out.println(ifProcs.get(scope.image).get(index));
         } else {
           ifProcs.get(scope.image).get(index).get("if").add(hashmapComandos);
@@ -519,10 +534,12 @@ void guardarInfo(String t, ArrayList <String> params, Token scope, String estruc
           whileProcs.put(scope.image, new ArrayList<ArrayList<HashMap<String, ArrayList<String>>>>());
           whileProcs.get(scope.image).add(new ArrayList<HashMap<String, ArrayList<String>>>());
           whileProcs.get(scope.image).get(index).add(hashmapComandos);
+          orden.get(scope.image).add(estructura);
           // System.out.println(whileProcs.get(scope.image).get(index));
         } else if (whileProcs.get(scope.image).size() <= index){
           whileProcs.get(scope.image).add(new ArrayList<HashMap<String, ArrayList<String>>>());
           whileProcs.get(scope.image).get(index).add(hashmapComandos);
+          orden.get(scope.image).add(estructura);
           // System.out.println(whileProcs.get(scope.image).get(index));
         } else {
           whileProcs.get(scope.image).get(index).add(hashmapComandos);
@@ -534,10 +551,12 @@ void guardarInfo(String t, ArrayList <String> params, Token scope, String estruc
           repeatProcs.put(scope.image, new ArrayList<ArrayList<HashMap<String, ArrayList<String>>>>());
           repeatProcs.get(scope.image).add(new ArrayList<HashMap<String, ArrayList<String>>>());
           repeatProcs.get(scope.image).get(index).add(hashmapComandos);
-          System.out.println(repeatProcs.get(scope.image).get(index));
+          orden.get(scope.image).add(estructura);
+          // System.out.println(repeatProcs.get(scope.image).get(index));
         } else if (repeatProcs.get(scope.image).size() <= index){
           repeatProcs.get(scope.image).add(new ArrayList<HashMap<String, ArrayList<String>>>());
           repeatProcs.get(scope.image).get(index).add(hashmapComandos);
+          orden.get(scope.image).add(estructura);
           // System.out.println(repeatProcs.get(scope.image).get(index));
         } else {
           repeatProcs.get(scope.image).get(index).add(hashmapComandos);
