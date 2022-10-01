@@ -119,7 +119,9 @@ public class Robot implements RobotConstants {
       }
       procDef();
     }
-                            ifCounter = 0;
+    ifCounter = 0;
+    whileCounter = 0;
+    repeatCounter = 0;
     insBlock(localScope, t, false);
     jj_consume_token(GORP);
     int proc = 0;
@@ -133,31 +135,55 @@ public class Robot implements RobotConstants {
     System.out.println(instruccionesAEjecutar);
     sistema.printOutput("\u005cn");
     for (String instruccion : instruccionesAEjecutar) {
-      sistema.printOutput(instruccion);
-      sistema.printOutput("************************************");
-      // switch (instruccion) {
-      //   case "if":
-      //     sistema.printOutput("Ejecutando if");
-      //     sistema.printOutput("\n");
-      //     ifs++;
-      //     break;
-      //   default:
-      //     if (procCommands.containsKey(instruccion)) {
-      //       ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
-      //       sistema.printOutput(instruccion + " " + params);
-      //       sistema.printOutput("\n");
-      //     } else if (varNames.contains(instruccion)) {
-      //       sistema.printOutput(instruccion);
-      //       sistema.printOutput("\n");
-      //     } else {
-      //       ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
-      //       sistema.printOutput(instruccion + " " + params);
-      //       sistema.printOutput("\n");
-      //       // procExecution(instruccion, params, sistema);
-      //     }
-      //     proc++;
-      //     break;
-      // }
+      // sistema.printOutput(instruccion);
+      // sistema.printOutput("************************************");
+      switch (instruccion) {
+        case "if":
+          ArrayList<HashMap<String, ArrayList<String>>> comandosDelIf = ifProcs.get(procedimientoActual).get(ifs).get("if");
+          ArrayList<HashMap<String, ArrayList<String>>> comandosDelElse = ifProcs.get(procedimientoActual).get(ifs).get("else");
+          HashMap<String, ArrayList<String>> condicion = comandosDelIf.get(0);
+          // comandos sin condicion
+          List <HashMap<String, ArrayList<String>>> comandosSinCondicion = comandosDelIf.subList(1, comandosDelIf.size());
+          System.out.println("Condicion del if: " + condicion);
+          System.out.println("Comandos del if: " + comandosSinCondicion);
+          System.out.println("Comandos del else: " + comandosDelElse);
+          ifs++;
+          break;
+        case "while":
+          ArrayList<HashMap<String, ArrayList<String>>> comandosDelWhile = whileProcs.get(procedimientoActual).get(whiles);
+          HashMap<String, ArrayList<String>> condicionWhile = comandosDelWhile.get(0);
+          List <HashMap<String, ArrayList<String>>> comandosSinCondicionWhile = comandosDelWhile.subList(1, comandosDelWhile.size());
+          System.out.println("Condicion del while: " + condicionWhile);
+          System.out.println("Comandos del while: " + comandosSinCondicionWhile);
+          whiles++;
+          break;
+        case "repeat":
+          ArrayList<HashMap<String, ArrayList<String>>> comandosDelRepeat = repeatProcs.get(procedimientoActual).get(repeats);
+          HashMap<String, ArrayList<String>> condicionRepeat = comandosDelRepeat.get(0);
+          List <HashMap<String, ArrayList<String>>> comandosSinCondicionRepeat = comandosDelRepeat.subList(1, comandosDelRepeat.size());
+          String numeroDeRepeticiones = condicionRepeat.get("repeat").get(0);
+          System.out.println("Veces: " + numeroDeRepeticiones);
+          System.out.println("Comandos del repeat: " + comandosSinCondicionRepeat);
+          repeats++;
+          break;
+        default:
+          ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
+          if (procCommands.containsKey(instruccion)) {
+            // ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
+            sistema.printOutput(instruccion + " " + params);
+            sistema.printOutput("\u005cn");
+          } else if (varNames.contains(instruccion)) {
+            sistema.printOutput(instruccion + " " + params);
+            sistema.printOutput("\u005cn");
+          } else {
+            // ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
+            sistema.printOutput(instruccion + " " + params);
+            sistema.printOutput("\u005cn");
+            // procExecution(instruccion, params, sistema);
+          }
+          proc++;
+          break;
+      }
     }
     sistema.printOutput("************************************");
     sistema.printOutput("\u005cn");

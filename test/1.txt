@@ -30,6 +30,10 @@ CORP
 jumpTo (3 ,3) ;
 n := 6;
 if (isfacing(north)) {x:=2} fi;
+if (isfacing(south)) {drop(1); get(2); grab(3); grab(4); grab(5)} else {free(5); get(3)} fi;
+while (canWalk (north ,1)) do {grab(3); free(2);grab(3); free(2)} od;
+repeatTimes x {grab(10)} per;
+repeatTimes 3 {grab(5)} per;
 putCB (2 ,1)
 }
 GORP
