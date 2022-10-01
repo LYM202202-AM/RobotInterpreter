@@ -447,23 +447,39 @@ void posibleCommands(ArrayList <String > localScope, Token scope, boolean execut
     } else {
       // switch estructura
       params.add(p.image);
+      HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
       hashmapComandos.put(t.image, params);
       // separar string estructura por comas
       String [] estructuraArray = estructura.split(",");
-      estructura = estructuraArray[0]
-      String index = estructuraArray[1]
+      estructura = estructuraArray[0];
+      int index = -1;
+      try{
+        index = Integer.parseInt(estructuraArray[1]);
+      } catch (Exception e){
+        System.out.println("Error en el indice");
+      }
       switch (estructura){
         case "procedure":
+          hashmapComandos.put(t.image, params);
           procCommands.get(scope.image).add(hashmapComandos);
           break;
         case "if":
-          if (ifProcs.get(scope.image).get(index) == null){
-            ifProcs.get(scope.image).put(index, new ArrayList<HashMap<String, ArrayList<String>>>());
-            HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
-            ifProcs.get(scope.image).get(index).add(hashmapComandos);
-          }
-          HashMap<String, ArrayList<String>> ifCommands = ifProcs.get(scope.image).get(index);
-          ifCommands.get(t.image).add(p.image);
+          if (ifProcs.get(scope.image) == null){
+            ifProcs.put(scope.image, new ArrayList<HashMap<String,ArrayList<HashMap<String, ArrayList<String>>>>>());
+            ifProcs.get(scope.image).add(new HashMap<String,ArrayList<HashMap<String, ArrayList<String>>>>());
+            ArrayList<HashMap<String, ArrayList<String>>> temp = new ArrayList<HashMap<String, ArrayList<String>>>();
+            temp.add(hashmapComandos);
+            ifProcs.get(scope.image).get(index).put("if", temp);
+            System.out.println(ifProcs.get(scope.image).get(index));
+          } else if (ifProcs.get(scope.image).size() <= index){
+            ifProcs.get(scope.image).add(new HashMap<String,ArrayList<HashMap<String, ArrayList<String>>>>());
+            ArrayList<HashMap<String, ArrayList<String>>> temp = new ArrayList<HashMap<String, ArrayList<String>>>();
+            temp.add(hashmapComandos);
+            ifProcs.get(scope.image).get(index).put("if", temp);
+            System.out.println(ifProcs.get(scope.image).get(index));
+          } else {
+            ifProcs.get(scope.image).get(index).get("if").add(hashmapComandos);
+            System.out.println(ifProcs.get(scope.image).get(index));
           }
           break;
         case "else":
@@ -864,10 +880,10 @@ void ifBlock(ArrayList <String > localScope, Token scope, boolean execute):
   Token t;
   String estructura = "if";
   int index = ifCounter;
-  estructura += ","index;
+  estructura += ","+index;
   System.out.println("if");
   String elseIndex = "else";
-  elseIndex += ","index;
+  elseIndex += ","+index;
   ifCounter++;
 }
 {

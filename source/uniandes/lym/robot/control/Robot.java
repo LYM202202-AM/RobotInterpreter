@@ -392,7 +392,6 @@ public class Robot implements RobotConstants {
   final public void posibleCommands(ArrayList <String > localScope, Token scope, boolean execute, String estructura) throws ParseException {
   Token t;
   // hashmap que contiene como llave el nombre del comando y como valor un arreglo con los parametros
-  HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
   ArrayList <String> params = new ArrayList<String>();
   Token p;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -424,22 +423,39 @@ public class Robot implements RobotConstants {
     } else {
       // switch estructura
       params.add(p.image);
+      HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
       hashmapComandos.put(t.image, params);
+      // separar string estructura por comas
+      String [] estructuraArray = estructura.split(",");
+      estructura = estructuraArray[0];
+      int index = -1;
+      try{
+        index = Integer.parseInt(estructuraArray[1]);
+      } catch (Exception e){
+        System.out.println("Error en el indice");
+      }
       switch (estructura){
         case "procedure":
+          hashmapComandos.put(t.image, params);
           procCommands.get(scope.image).add(hashmapComandos);
           break;
         case "if":
-          ArrayList <HashMap<String, ArrayList<String>>> ifCommands = new ArrayList<HashMap<String, ArrayList<String>>>();
-          ifCommands.add(hashmapComandos);
-          HashMap <String, ArrayList<HashMap<String, ArrayList<String>>>> ifBlock = new HashMap<String, ArrayList<HashMap<String, ArrayList<String>>>>();
-          ifBlock.put("if", ifCommands);
-          if (ifProcs.containsKey(scope.image)){
-            ifProcs.get(scope.image).add(ifBlock);
+          if (ifProcs.get(scope.image) == null){
+            ifProcs.put(scope.image, new ArrayList<HashMap<String,ArrayList<HashMap<String, ArrayList<String>>>>>());
+            ifProcs.get(scope.image).add(new HashMap<String,ArrayList<HashMap<String, ArrayList<String>>>>());
+            ArrayList<HashMap<String, ArrayList<String>>> temp = new ArrayList<HashMap<String, ArrayList<String>>>();
+            temp.add(hashmapComandos);
+            ifProcs.get(scope.image).get(index).put("if", temp);
+            System.out.println(ifProcs.get(scope.image).get(index));
+          } else if (ifProcs.get(scope.image).size() <= index){
+            ifProcs.get(scope.image).add(new HashMap<String,ArrayList<HashMap<String, ArrayList<String>>>>());
+            ArrayList<HashMap<String, ArrayList<String>>> temp = new ArrayList<HashMap<String, ArrayList<String>>>();
+            temp.add(hashmapComandos);
+            ifProcs.get(scope.image).get(index).put("if", temp);
+            System.out.println(ifProcs.get(scope.image).get(index));
           } else {
-            ArrayList <HashMap<String, ArrayList<HashMap<String, ArrayList<String>>>>> ifProcsAux = new ArrayList<HashMap<String, ArrayList<HashMap<String, ArrayList<String>>>>>();
-            ifProcsAux.add(ifBlock);
-            ifProcs.put(scope.image, ifProcsAux);
+            ifProcs.get(scope.image).get(index).get("if").add(hashmapComandos);
+            System.out.println(ifProcs.get(scope.image).get(index));
           }
           break;
         case "else":
@@ -918,7 +934,12 @@ public class Robot implements RobotConstants {
   final public void ifBlock(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
   Token t;
   String estructura = "if";
-  int index = 0;
+  int index = ifCounter;
+  estructura += ","+index;
+  System.out.println("if");
+  String elseIndex = "else";
+  elseIndex += ","+index;
+  ifCounter++;
     jj_consume_token(IF);
     jj_consume_token(PI);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -940,7 +961,7 @@ public class Robot implements RobotConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case ELSE:
       jj_consume_token(ELSE);
-      terminalBlock(localScope, scope, execute, "else");
+      terminalBlock(localScope, scope, execute, elseIndex);
       break;
     default:
       jj_la1[20] = jj_gen;
@@ -990,17 +1011,6 @@ public class Robot implements RobotConstants {
     finally { jj_save(0, xla); }
   }
 
-  private boolean jj_3_1() {
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_6() {
-    if (jj_3R_7()) return true;
-    if (jj_scan_token(ASSIGNMENT)) return true;
-    return false;
-  }
-
   private boolean jj_3R_9() {
     if (jj_scan_token(CONSTANT)) return true;
     return false;
@@ -1018,6 +1028,17 @@ public class Robot implements RobotConstants {
     jj_scanpos = xsp;
     if (jj_3R_9()) return true;
     }
+    return false;
+  }
+
+  private boolean jj_3_1() {
+    if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_6() {
+    if (jj_3R_7()) return true;
+    if (jj_scan_token(ASSIGNMENT)) return true;
     return false;
   }
 
