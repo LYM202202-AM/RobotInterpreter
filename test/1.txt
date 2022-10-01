@@ -29,6 +29,7 @@ CORP
 {
 jumpTo (3 ,3) ;
 n := 6;
+if (isfacing(north)) {x:=2} fi;
 putCB (2 ,1)
 }
 GORP

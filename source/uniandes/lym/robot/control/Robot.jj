@@ -61,6 +61,7 @@ public class Robot
 
   static HashMap<String, ArrayList<String>> orden = new HashMap<String, ArrayList<String>>();
 
+
 	private RobotWorldDec world;
 	
 	
@@ -86,7 +87,7 @@ public class Robot
         repeatProcs.clear();
         orden.clear();
         // ejecuta la gramatica
-        parser.program();
+        parser.command(null);
         System.out.println("Programa leido correctamente");
         System.out.println("Variables: " + varNames);
         System.out.println("Procedimientos: " + procNames);
@@ -217,7 +218,8 @@ TOKEN: // simbolos
 
 // Base de la gramatica
 
-void program():
+
+boolean command(Console sistema):
 {
   ArrayList<String> localScope = new ArrayList<String>();
   ArrayList<String> ordenLocal = new ArrayList<String>();
@@ -231,39 +233,90 @@ void program():
     orden.put(t.image, ordenLocal);
 
   }
-  (varDef())? (procDef())* insBlock(localScope, t, false) < GORP >
+  (varDef())? (procDef())* {ifCounter = 0;}insBlock(localScope, t, false) < GORP >
   {
-    for (HashMap<String, ArrayList<String>> proc : this.procCommands.get("PROG")) 
-    {//HashCompleto
-      for (String key : proc.keySet()) 
-      {//Nombre del procedimiento o variable
-        System.out.println("--------------");
-        System.out.println(key); 
-        ArrayList<String> parametros = proc.get(key);
-        if (this.procNames.contains(key))
-          {
-            System.out.println(key);
-            System.out.println(parametros);
-            procExecution(key, parametros);
-          }
-          else if (this.varNames.contains(key))
-          {
-            //Cosas de variables 
-            this.varValues.put(key, parametros.get(0));
-          }
-        }
-      }
+    int proc = 0;
+    int ifs = 0;
+    int whiles = 0;
+    int repeats = 0;
+    String procedimientoActual = t.image;
+    ArrayList<String> instruccionesAEjecutar = orden.get(procedimientoActual);
+    sistema.printOutput("Comenzando a ejecutar el programa " + procedimientoActual);
+    System.out.println("Comenzando a ejecutar el programa " + procedimientoActual);
+    System.out.println(instruccionesAEjecutar);
+    sistema.printOutput("\n");
+    for (String instruccion : instruccionesAEjecutar) {
+      sistema.printOutput(instruccion);
+      sistema.printOutput("************************************");
+      // switch (instruccion) {
+      //   case "if":
+      //     sistema.printOutput("Ejecutando if");
+      //     sistema.printOutput("\n");
+      //     ifs++;
+      //     break;
+      //   default:
+      //     if (procCommands.containsKey(instruccion)) {
+      //       ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
+      //       sistema.printOutput(instruccion + " " + params);
+      //       sistema.printOutput("\n");
+      //     } else if (varNames.contains(instruccion)) {
+      //       sistema.printOutput(instruccion);
+      //       sistema.printOutput("\n");
+      //     } else {
+      //       ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
+      //       sistema.printOutput(instruccion + " " + params);
+      //       sistema.printOutput("\n");
+      //       // procExecution(instruccion, params, sistema);
+      //     }
+      //     proc++;
+      //     break;
+      // }
+    }
+    sistema.printOutput("************************************");
+    sistema.printOutput("\n");
+    String indices = proc + " " + ifs + " " + whiles + " " + repeats;
+    sistema.printOutput(indices);
+    sistema.printOutput("\n");
+
+
+
+
+    // for (HashMap<String, ArrayList<String>> proc : this.procCommands.get("PROG")) 
+    // {//HashCompleto
+    //   for (String key : proc.keySet()) 
+    //   {//Nombre del procedimiento o variable
+    //     System.out.println("--------------");
+    //     System.out.println(key); 
+    //     ArrayList<String> parametros = proc.get(key);
+    //     if (this.procNames.contains(key))
+    //       {
+    //         System.out.println(key);
+    //         System.out.println(parametros);
+    //         procExecution(key, parametros, sistema);
+            
+    //       }
+    //       else if (this.varNames.contains(key))
+    //       {
+    //         //Cosas de variables 
+    //         this.varValues.put(key, parametros.get(0));
+    //       }
+    //     }
+    //   }
+    return false;
     }
   }
 
-void procExecution(String procName, ArrayList<String> params):
+void procExecution(String procName, ArrayList<String> params, Console sistema):
 {}
 {
   {
-      for (HashMap<String, ArrayList<String>> proc : this.procCommands.get(procName))
+    for (HashMap<String, ArrayList<String>> proc : this.procCommands.get(procName))
     {//HashCompleto
-      for (String key : proc.keySet()) 
+      for (String key : proc.keySet())
       {//Nombre del procedimiento o variable
+        sistema.printOutput("--------------");
+        sistema.printOutput(key);
+        sistema.printOutput("\n");
         switch(key)
         {
           case "walk":
@@ -278,12 +331,11 @@ void procExecution(String procName, ArrayList<String> params):
             if (params.size() == 1)
             {
               world.putChips(Integer.parseInt(params.get(0)));
-              salida = "Command: Drop" + params.get(0) + " chips"; 
+              salida = "Command: Drop" + params.get(0) + " chips";
             }
             break;
           }
         }
-        sistema.printOutput(salida);
       }
     }
   }
@@ -311,7 +363,7 @@ void walkExecution(ArrayList<String> params):
       orParams.add("east");
       orParams.add("west");
 
-      if dirParams.contains(params.get(0))
+      if (dirParams.contains(params.get(0)))
       {
         if (params.get(0) == "front")
         {
@@ -330,14 +382,14 @@ void walkExecution(ArrayList<String> params):
           world.moveHorizontally(Integer.parseInt(params.get(0)), false);
         }
       }
-      else if orParams.contains(params.get(0))
+      else if (orParams.contains(params.get(0)))
       {
         if (params.get(0) == "north")
         {
-          correctOr = correctOr(0, false);
-          if correctOr
+          boolean correctOr = correctOr(0, false);
+          if (correctOr)
           {
-            world.moveForward()
+            // world.moveForward();
           }
         }
       }
@@ -345,7 +397,7 @@ void walkExecution(ArrayList<String> params):
   }
 }
 
-Boolean correctOr(int direction, Boolean correct):
+boolean correctOr(int direction, boolean correct):
 {}
 {
   {
@@ -362,26 +414,21 @@ Boolean correctOr(int direction, Boolean correct):
       else
       {
         world.turnRight();
-        if direction < 3
+        if (direction < 3)
         {
           direction ++;
         }
         else
-        { 
+        {
           direction = 0;
         }
-        
       }
       correctOr(direction, correct);
       return correct;
     }
   }
 }
-          
 
-
-  
-    
 
 
     // for (HashMap<String, ArrayList<String>> procMaps: procsList)
@@ -575,7 +622,7 @@ void globalCommand(ArrayList <String > localScope, Token scope, boolean execute,
 {
 }
 {
-	command(localScope, scope, execute, estructura)(< SC > command(localScope, scope ,execute, estructura))*
+	theCommands(localScope, scope, execute, estructura)(< SC > theCommands(localScope, scope ,execute, estructura))*
 }
 
 /*
@@ -590,7 +637,7 @@ void globalCommand(ArrayList <String > localScope, Token scope, boolean execute,
  * return: String que contiene el nombre del comando
  */
 
-void command(ArrayList <String > localScope, Token scope ,boolean execute, String estructura):
+void theCommands(ArrayList <String > localScope, Token scope ,boolean execute, String estructura):
 {
 }
 {
@@ -603,7 +650,7 @@ void command(ArrayList <String > localScope, Token scope ,boolean execute, Strin
   |
   (
   LOOKAHEAD(2)
-  assignment(localScope, scope, execute, estructura)
+  assignment(localScope, scope, true, estructura)
   | rules(localScope, scope, execute, estructura)
   )
   | ifBlock(localScope, scope, execute)
@@ -651,14 +698,14 @@ void guardarInfo(String t, ArrayList <String> params, Token scope, String estruc
           ArrayList<HashMap<String, ArrayList<String>>> temp = new ArrayList<HashMap<String, ArrayList<String>>>();
           temp.add(hashmapComandos);
           ifProcs.get(scope.image).get(index).put("if", temp);
-          orden.get(scope.image).add(t);
+          orden.get(scope.image).add(estructura);
           // System.out.println(ifProcs.get(scope.image).get(index));
         } else if (ifProcs.get(scope.image).size() <= index){
           ifProcs.get(scope.image).add(new HashMap<String,ArrayList<HashMap<String, ArrayList<String>>>>());
           ArrayList<HashMap<String, ArrayList<String>>> temp = new ArrayList<HashMap<String, ArrayList<String>>>();
           temp.add(hashmapComandos);
           ifProcs.get(scope.image).get(index).put("if", temp);
-          orden.get(scope.image).add(t);
+          orden.get(scope.image).add(estructura);
           // System.out.println(ifProcs.get(scope.image).get(index));
         } else {
           ifProcs.get(scope.image).get(index).get("if").add(hashmapComandos);
@@ -694,12 +741,12 @@ void guardarInfo(String t, ArrayList <String> params, Token scope, String estruc
           whileProcs.put(scope.image, new ArrayList<ArrayList<HashMap<String, ArrayList<String>>>>());
           whileProcs.get(scope.image).add(new ArrayList<HashMap<String, ArrayList<String>>>());
           whileProcs.get(scope.image).get(index).add(hashmapComandos);
-          orden.get(scope.image).add(t);
+          orden.get(scope.image).add(estructura);
           // System.out.println(whileProcs.get(scope.image).get(index));
         } else if (whileProcs.get(scope.image).size() <= index){
           whileProcs.get(scope.image).add(new ArrayList<HashMap<String, ArrayList<String>>>());
           whileProcs.get(scope.image).get(index).add(hashmapComandos);
-          orden.get(scope.image).add(t);
+          orden.get(scope.image).add(estructura);
           // System.out.println(whileProcs.get(scope.image).get(index));
         } else {
           whileProcs.get(scope.image).get(index).add(hashmapComandos);
@@ -711,12 +758,12 @@ void guardarInfo(String t, ArrayList <String> params, Token scope, String estruc
           repeatProcs.put(scope.image, new ArrayList<ArrayList<HashMap<String, ArrayList<String>>>>());
           repeatProcs.get(scope.image).add(new ArrayList<HashMap<String, ArrayList<String>>>());
           repeatProcs.get(scope.image).get(index).add(hashmapComandos);
-          orden.get(scope.image).add(t);
+          orden.get(scope.image).add(estructura);
           // System.out.println(repeatProcs.get(scope.image).get(index));
         } else if (repeatProcs.get(scope.image).size() <= index){
           repeatProcs.get(scope.image).add(new ArrayList<HashMap<String, ArrayList<String>>>());
           repeatProcs.get(scope.image).get(index).add(hashmapComandos);
-          orden.get(scope.image).add(t);
+          orden.get(scope.image).add(estructura);
           // System.out.println(repeatProcs.get(scope.image).get(index));
         } else {
           repeatProcs.get(scope.image).get(index).add(hashmapComandos);
@@ -1024,6 +1071,8 @@ void assignment(ArrayList <String > localScope, Token scope, boolean execute, St
   t=parameter(localScope, false) < ASSIGNMENT > n=< CONSTANT >
   {
     if (execute){
+      params.add(n.image);
+      guardarInfo(t.image, params, scope, estructura);
       if (localScope.contains(t.image)){
         localScope.set(localScope.indexOf(t.image), n.image);
       } else if (varNames.contains(t.image)){
@@ -1224,7 +1273,7 @@ void repeatBlock(ArrayList <String> localScope, Token scope, boolean execute):
     }
   }
 }
-//	//boolean command(uniandes.lym.robot.view.Console sistema) :
+	//boolean command(uniandes.lym.robot.view.Console sistema) :
 //	boolean command(Console sistema):
 //	{	
 //		
