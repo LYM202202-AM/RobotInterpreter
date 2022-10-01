@@ -16,7 +16,12 @@ x:=1;
         while (canWalk (north ,1)) do {free(5); get(3)} od;
     if (isfacing(north)) {drop(2); get(1); grab(1); grab(2); grab(3)} else {free(5); get(40)} fi;
     if (isfacing(north)) {drop(1); get(2); grab(3); grab(4); grab(5)} else {free(5); get(3)} fi;
-     if (isfacing(north)) {grab(3); free(2)} else {free(5); get(99)} fi
+     if (isfacing(north)) {grab(3); free(2)} else {free(5); get(99)} fi;
+         repeatTimes 20 {grab(10); 
+    free(1)
+    } per;
+    repeatTimes x {grab(10)} per;
+    repeatTimes c {grab(10)} per
 
 }
 CORP
