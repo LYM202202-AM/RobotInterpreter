@@ -53,6 +53,10 @@ public class Robot
   // repeatProcs es un HashMap que contiene como llave el nombre de un procedimiento y como valor un arreglo de HashMaps que contienen como llave un string y como valor un arreglo de hashmaps que contiene como llave el comando y como valor un arreglo de Strings con los parametros del comando
   static HashMap<String, ArrayList<ArrayList<HashMap<String, ArrayList<String>>>>> repeatProcs = new HashMap<String, ArrayList<ArrayList<HashMap<String, ArrayList<String>>>>>();
 
+  static int ifCounter = 0;
+  static int whileCounter = 0;
+  static int repeatCounter = 0;
+
 	private RobotWorldDec world;
 	
 	
@@ -283,6 +287,9 @@ void procDef():
   boolean execute = false;
   // Arraylist que contiene hashmaps donde la llave es el nombre del comando y el valor es un arreglo con los parametros
   ArrayList<HashMap<String, ArrayList<String>>> listaMapaComandos = new ArrayList<HashMap<String, ArrayList<String>>>();
+  ifCounter = 0;
+  whileCounter = 0;
+  repeatCounter = 0;
 }
 {
 	< PROC > scope=saveGlobalNamesxType("PROC")
@@ -312,7 +319,7 @@ void procDef():
 
 void insBlock(ArrayList <String> localScope, Token scope, boolean execute):
 {
-  String estructura = scope.image;
+  String estructura = "procedure";
 }
 {
   < CBL > globalCommand(localScope, scope, execute, estructura) < CBR >
@@ -426,7 +433,6 @@ void posibleCommands(ArrayList <String > localScope, Token scope, boolean execut
 {
   Token t;
   // hashmap que contiene como llave el nombre del comando y como valor un arreglo con los parametros
-  HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
   ArrayList <String> params = new ArrayList<String>();
   Token p;
 }
@@ -439,13 +445,64 @@ void posibleCommands(ArrayList <String > localScope, Token scope, boolean execut
     if (execute){
       System.out.println(t.image + " " + p.image);
     } else {
+      // switch estructura
       params.add(p.image);
       hashmapComandos.put(t.image, params);
+      // separar string estructura por comas
+      String [] estructuraArray = estructura.split(",");
+      estructura = estructuraArray[0]
+      String index = estructuraArray[1]
+      switch (estructura){
+        case "procedure":
+          procCommands.get(scope.image).add(hashmapComandos);
+          break;
+        case "if":
+          if (ifProcs.get(scope.image).get(index) == null){
+            ifProcs.get(scope.image).put(index, new ArrayList<HashMap<String, ArrayList<String>>>());
+            HashMap <String, ArrayList<String>> hashmapComandos = new HashMap<String, ArrayList<String>>();
+            ifProcs.get(scope.image).get(index).add(hashmapComandos);
+          }
+          HashMap<String, ArrayList<String>> ifCommands = ifProcs.get(scope.image).get(index);
+          ifCommands.get(t.image).add(p.image);
+          }
+          break;
+        case "else":
+          ArrayList <HashMap<String, ArrayList<String>>> elseCommands = new ArrayList<HashMap<String, ArrayList<String>>>();
+          elseCommands.add(hashmapComandos);
+          ArrayList<HashMap<String, ArrayList<HashMap<String, ArrayList<String>>>>> procIfs = ifProcs.get(scope.image);
+          HashMap <String, ArrayList<HashMap<String, ArrayList<String>>>> ifBlockAux = procIfs.get(procIfs.size() - 1);
+          ifBlockAux.put("else", elseCommands);
+          break;
+        case "while":
+          ArrayList <HashMap<String, ArrayList<String>>> whileCommands = new ArrayList<HashMap<String, ArrayList<String>>>();
+          whileCommands.add(hashmapComandos);
+          ArrayList<ArrayList<HashMap<String, ArrayList<String>>>> procWhiles = whileProcs.get(scope.image);
+          if (whileProcs.containsKey(scope.image)){
+            whileProcs.get(scope.image).add(whileCommands);
+          } else {
+            ArrayList <ArrayList<HashMap<String, ArrayList<String>>>> whileProcsAux = new ArrayList<ArrayList<HashMap<String, ArrayList<String>>>>();
+            whileProcsAux.add(whileCommands);
+            whileProcs.put(scope.image, whileProcsAux);
+          }
+
+          break;
+        // case "repeat":
+        //   params.add(p.image);
+        //   hashmapComandos.put(t.image, params);
+        //   repeatCommands.get(scope.image).add(hashmapComandos);
+        //   break;
+      }
+      System.out.println("Comando: " + t.image + " Parametro: " + p.image);
       System.out.println(hashmapComandos);
       System.out.println(scope.image);
-      System.out.println(procCommands);
-      procCommands.get(scope.image).add(hashmapComandos);
-    }
+      System.out.println("Comandos del procedimiento: " + procCommands.get(scope.image));
+      System.out.println("Comandos del if: " + ifProcs.get(scope.image));
+      System.out.println("Comandos del while: " + whileProcs.get(scope.image));
+      System.out.println("***************************");
+      }
+
+
+    
   }
 }
 
@@ -806,9 +863,15 @@ void ifBlock(ArrayList <String > localScope, Token scope, boolean execute):
 {
   Token t;
   String estructura = "if";
+  int index = ifCounter;
+  estructura += ","index;
+  System.out.println("if");
+  String elseIndex = "else";
+  elseIndex += ","index;
+  ifCounter++;
 }
 {
-  < IF > < PI > (not(localScope, scope, execute, estructura) | condition(localScope, scope, execute, estructura)) < PD > terminalBlock(localScope, scope, execute, estructura) ( < ELSE >terminalBlock(localScope, scope, execute, "else") )? < FI >
+  < IF > < PI > (not(localScope, scope, execute, estructura) | condition(localScope, scope, execute, estructura)) < PD > terminalBlock(localScope, scope, execute, estructura) ( < ELSE >terminalBlock(localScope, scope, execute, elseIndex) )? < FI >
 
 }
 

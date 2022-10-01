@@ -10,7 +10,9 @@ look(north);
 walk(1);
 walk(north, 2);
 walk(front, 1);
-x:=1
+x:=1;
+    while (canWalk (north ,1)) do {grab(3); free(2)} od;
+        if (isfacing(north)) {drop(2); get(1); grab(1); grab(2); grab(3)} else {free(5); get(40)} fi
 
 }
 CORP

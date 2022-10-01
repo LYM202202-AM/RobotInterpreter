@@ -28,6 +28,10 @@ public class Robot implements RobotConstants {
   // repeatProcs es un HashMap que contiene como llave el nombre de un procedimiento y como valor un arreglo de HashMaps que contienen como llave un string y como valor un arreglo de hashmaps que contiene como llave el comando y como valor un arreglo de Strings con los parametros del comando
   static HashMap<String, ArrayList<ArrayList<HashMap<String, ArrayList<String>>>>> repeatProcs = new HashMap<String, ArrayList<ArrayList<HashMap<String, ArrayList<String>>>>>();
 
+  static int ifCounter = 0;
+  static int whileCounter = 0;
+  static int repeatCounter = 0;
+
         private RobotWorldDec world;
 
 
@@ -174,6 +178,9 @@ public class Robot implements RobotConstants {
   boolean execute = false;
   // Arraylist que contiene hashmaps donde la llave es el nombre del comando y el valor es un arreglo con los parametros
   ArrayList<HashMap<String, ArrayList<String>>> listaMapaComandos = new ArrayList<HashMap<String, ArrayList<String>>>();
+  ifCounter = 0;
+  whileCounter = 0;
+  repeatCounter = 0;
     jj_consume_token(PROC);
     scope = saveGlobalNamesxType("PROC");
           System.out.println(scope.image);
@@ -220,7 +227,7 @@ public class Robot implements RobotConstants {
  * @param execute: booleano que indica si el procedimiento se ejecuta o no
  */
   final public void insBlock(ArrayList <String> localScope, Token scope, boolean execute) throws ParseException {
-  String estructura = scope.image;
+  String estructura = "procedure";
     jj_consume_token(CBL);
     globalCommand(localScope, scope, execute, estructura);
     jj_consume_token(CBR);
@@ -415,13 +422,60 @@ public class Robot implements RobotConstants {
     if (execute){
       System.out.println(t.image + " " + p.image);
     } else {
+      // switch estructura
       params.add(p.image);
       hashmapComandos.put(t.image, params);
+      switch (estructura){
+        case "procedure":
+          procCommands.get(scope.image).add(hashmapComandos);
+          break;
+        case "if":
+          ArrayList <HashMap<String, ArrayList<String>>> ifCommands = new ArrayList<HashMap<String, ArrayList<String>>>();
+          ifCommands.add(hashmapComandos);
+          HashMap <String, ArrayList<HashMap<String, ArrayList<String>>>> ifBlock = new HashMap<String, ArrayList<HashMap<String, ArrayList<String>>>>();
+          ifBlock.put("if", ifCommands);
+          if (ifProcs.containsKey(scope.image)){
+            ifProcs.get(scope.image).add(ifBlock);
+          } else {
+            ArrayList <HashMap<String, ArrayList<HashMap<String, ArrayList<String>>>>> ifProcsAux = new ArrayList<HashMap<String, ArrayList<HashMap<String, ArrayList<String>>>>>();
+            ifProcsAux.add(ifBlock);
+            ifProcs.put(scope.image, ifProcsAux);
+          }
+          break;
+        case "else":
+          ArrayList <HashMap<String, ArrayList<String>>> elseCommands = new ArrayList<HashMap<String, ArrayList<String>>>();
+          elseCommands.add(hashmapComandos);
+          ArrayList<HashMap<String, ArrayList<HashMap<String, ArrayList<String>>>>> procIfs = ifProcs.get(scope.image);
+          HashMap <String, ArrayList<HashMap<String, ArrayList<String>>>> ifBlockAux = procIfs.get(procIfs.size() - 1);
+          ifBlockAux.put("else", elseCommands);
+          break;
+        case "while":
+          ArrayList <HashMap<String, ArrayList<String>>> whileCommands = new ArrayList<HashMap<String, ArrayList<String>>>();
+          whileCommands.add(hashmapComandos);
+          ArrayList<ArrayList<HashMap<String, ArrayList<String>>>> procWhiles = whileProcs.get(scope.image);
+          if (whileProcs.containsKey(scope.image)){
+            whileProcs.get(scope.image).add(whileCommands);
+          } else {
+            ArrayList <ArrayList<HashMap<String, ArrayList<String>>>> whileProcsAux = new ArrayList<ArrayList<HashMap<String, ArrayList<String>>>>();
+            whileProcsAux.add(whileCommands);
+            whileProcs.put(scope.image, whileProcsAux);
+          }
+
+          break;
+        // case "repeat":
+        //   params.add(p.image);
+        //   hashmapComandos.put(t.image, params);
+        //   repeatCommands.get(scope.image).add(hashmapComandos);
+        //   break;
+      }
+      System.out.println("Comando: " + t.image + " Parametro: " + p.image);
       System.out.println(hashmapComandos);
       System.out.println(scope.image);
-      System.out.println(procCommands);
-      procCommands.get(scope.image).add(hashmapComandos);
-    }
+      System.out.println("Comandos del procedimiento: " + procCommands.get(scope.image));
+      System.out.println("Comandos del if: " + ifProcs.get(scope.image));
+      System.out.println("Comandos del while: " + whileProcs.get(scope.image));
+      System.out.println("***************************");
+      }
   }
 
 /*
@@ -864,6 +918,7 @@ public class Robot implements RobotConstants {
   final public void ifBlock(ArrayList <String > localScope, Token scope, boolean execute) throws ParseException {
   Token t;
   String estructura = "if";
+  int index = 0;
     jj_consume_token(IF);
     jj_consume_token(PI);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -935,6 +990,11 @@ public class Robot implements RobotConstants {
     finally { jj_save(0, xla); }
   }
 
+  private boolean jj_3_1() {
+    if (jj_3R_6()) return true;
+    return false;
+  }
+
   private boolean jj_3R_6() {
     if (jj_3R_7()) return true;
     if (jj_scan_token(ASSIGNMENT)) return true;
@@ -958,11 +1018,6 @@ public class Robot implements RobotConstants {
     jj_scanpos = xsp;
     if (jj_3R_9()) return true;
     }
-    return false;
-  }
-
-  private boolean jj_3_1() {
-    if (jj_3R_6()) return true;
     return false;
   }
 
