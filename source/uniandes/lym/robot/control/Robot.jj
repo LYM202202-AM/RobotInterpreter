@@ -45,6 +45,14 @@ public class Robot
   static HashMap<String, Integer > globalScope = new HashMap<String, Integer>();
   // procCommands es un HashMap que contiene como llave el nombre de un procedimiento y como valor un hashmap que contiene como llave el nombre del comando y como valor un arreglo de Strings con los parametros del comando
   static HashMap<String, ArrayList<HashMap<String, ArrayList<String>>>> procCommands = new HashMap<String,  ArrayList<HashMap<String, ArrayList<String>>>>();
+
+  // whileProcs es un HashMap que contiene como llave el nombre de un procedimiento y como valor un arreglo de HashMaps que contiene como llave un string y como valor un hashmap que contiene como llave el nombre del comando y como valor un arreglo de Strings con los parametros del comando
+  static HashMap<String, ArrayList<ArrayList<HashMap<String, ArrayList<String>>>>> whileProcs = new HashMap<String, ArrayList<ArrayList<HashMap<String, ArrayList<String>>>>>();
+  // ifProcs es un HashMap que contiene como llave el nombre de un procedimiento y como valor un arreglo de HashMaps que contienen como llave un string y como valor un arreglo de hashmaps que contiene como llave el tipo de condicion y como valor un arreglo de HashMaps que contienen como llave el comando y como valor un arreglo de Strings con los parametros del comando
+  static HashMap<String, ArrayList<HashMap<String, ArrayList<HashMap<String, ArrayList<String>>>>>> ifProcs = new HashMap<String, ArrayList<HashMap<String, ArrayList<HashMap<String, ArrayList<String>>>>>>();
+  // repeatProcs es un HashMap que contiene como llave el nombre de un procedimiento y como valor un arreglo de HashMaps que contienen como llave un string y como valor un arreglo de hashmaps que contiene como llave el comando y como valor un arreglo de Strings con los parametros del comando
+  static HashMap<String, ArrayList<ArrayList<HashMap<String, ArrayList<String>>>>> repeatProcs = new HashMap<String, ArrayList<ArrayList<HashMap<String, ArrayList<String>>>>>();
+
 	private RobotWorldDec world;
 	
 	
