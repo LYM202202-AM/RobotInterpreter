@@ -124,19 +124,54 @@ public class Robot implements RobotConstants {
     repeatCounter = 0;
     insBlock(localScope, t, false);
     jj_consume_token(GORP);
+    String procedimientoActual = t.image;
+
+    HashMap<String, Integer> scopeLocal = new HashMap<String, Integer>();
+
+    ejecutarEnOrden(procedimientoActual,scopeLocal ,sistema);
+
+
+    // for (HashMap<String, ArrayList<String>> proc : this.procCo mmands.get("PROG")) 
+    // {//HashCompleto
+    //   for (String key : proc.keySet()) 
+    //   {//Nombre del procedimiento o variable
+    //     System.out.println("--------------");
+    //     System.out.println(key); 
+    //     ArrayList<String> parametros = proc.get(key);
+    //     if (this.procNames.contains(key))
+    //       {
+    //         System.out.println(key);
+    //         System.out.println(parametros);
+    //         procExecution(key, parametros, sistema);
+
+    //       }
+    //       else if (this.varNames.contains(key))
+    //       {
+    //         //Cosas de variables 
+    //         this.varValues.put(key, parametros.get(0));
+    //       }
+    //     }
+    //   }
+    {if (true) return false;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public void ejecutarEnOrden(String procedimientoActual, HashMap<String, Integer> scopeLocal , Console sistema) throws ParseException {
     int proc = 0;
     int ifs = 0;
     int whiles = 0;
     int repeats = 0;
-    String procedimientoActual = t.image;
     ArrayList<String> instruccionesAEjecutar = orden.get(procedimientoActual);
-    sistema.printOutput("Comenzando a ejecutar el programa " + procedimientoActual);
     System.out.println("Comenzando a ejecutar el programa " + procedimientoActual);
+    System.out.println("Comenzando a ejecutar el programa " + procedimientoActual);
+    System.out.println(scopeLocal);
     System.out.println(instruccionesAEjecutar);
-    sistema.printOutput("\u005cn");
+    System.out.println("\u005cn");
+    // System.out.println("****************");
+    // System.out.println(procNames);
     for (String instruccion : instruccionesAEjecutar) {
-      // sistema.printOutput(instruccion);
-      // sistema.printOutput("************************************");
+      // System.out.println(instruccion);
+      // System.out.println("************************************");
       switch (instruccion) {
         case "if":
           ArrayList<HashMap<String, ArrayList<String>>> comandosDelIf = ifProcs.get(procedimientoActual).get(ifs).get("if");
@@ -168,55 +203,37 @@ public class Robot implements RobotConstants {
           break;
         default:
           ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
-          if (procCommands.containsKey(instruccion)) {
+          // System.out.println("************************************");
+          // System.out.println(procNames);
+          if (procNames.contains(instruccion)) {
             // ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
-            sistema.printOutput(instruccion + " " + params);
-            sistema.printOutput("\u005cn");
+            System.out.println(instruccion + " " + params);
+            scopeLocal.clear();
+            ArrayList<String> paramsVariables = procParams.get(instruccion);
+            for (int i = 0; i < paramsVariables.size(); i++) {
+              scopeLocal.put(paramsVariables.get(i), Integer.parseInt(params.get(i)));
+            }
+            System.out.println("Scope local: " + scopeLocal);
+            ejecutarEnOrden(instruccion, scopeLocal, sistema);
+            System.out.println("\u005cn");
           } else if (varNames.contains(instruccion)) {
-            sistema.printOutput(instruccion + " " + params);
-            sistema.printOutput("\u005cn");
+            System.out.println(instruccion + " " + params);
+            System.out.println("\u005cn");
           } else {
             // ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
-            sistema.printOutput(instruccion + " " + params);
-            sistema.printOutput("\u005cn");
+            System.out.println(instruccion + " " + params);
+            System.out.println("\u005cn");
             // procExecution(instruccion, params, sistema);
           }
           proc++;
           break;
       }
     }
-    sistema.printOutput("************************************");
-    sistema.printOutput("\u005cn");
+    System.out.println("************************************");
+    System.out.println("\u005cn");
     String indices = proc + " " + ifs + " " + whiles + " " + repeats;
-    sistema.printOutput(indices);
-    sistema.printOutput("\u005cn");
-
-
-
-
-    // for (HashMap<String, ArrayList<String>> proc : this.procCommands.get("PROG")) 
-    // {//HashCompleto
-    //   for (String key : proc.keySet()) 
-    //   {//Nombre del procedimiento o variable
-    //     System.out.println("--------------");
-    //     System.out.println(key); 
-    //     ArrayList<String> parametros = proc.get(key);
-    //     if (this.procNames.contains(key))
-    //       {
-    //         System.out.println(key);
-    //         System.out.println(parametros);
-    //         procExecution(key, parametros, sistema);
-
-    //       }
-    //       else if (this.varNames.contains(key))
-    //       {
-    //         //Cosas de variables 
-    //         this.varValues.put(key, parametros.get(0));
-    //       }
-    //     }
-    //   }
-    {if (true) return false;}
-    throw new Error("Missing return statement in function");
+    System.out.println(indices);
+    System.out.println("\u005cn");
   }
 
   final public void procExecution(String procName, ArrayList<String> params, Console sistema) throws ParseException {
@@ -224,9 +241,9 @@ public class Robot implements RobotConstants {
     {//HashCompleto
       for (String key : proc.keySet())
       {//Nombre del procedimiento o variable
-        sistema.printOutput("--------------");
-        sistema.printOutput(key);
-        sistema.printOutput("\u005cn");
+        System.out.println("--------------");
+        System.out.println(key);
+        System.out.println("\u005cn");
         switch(key)
         {
           case "walk":
