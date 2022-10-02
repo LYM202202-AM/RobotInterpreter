@@ -4,7 +4,7 @@ PROC putCB (c , b )
 {
 drop ( c ) ;
 free ( b ) ;
-walk ( n )
+walk ( south, 2)
 }
 CORP
 PROC goNorth ()
@@ -19,7 +19,6 @@ if ( canWalk ( west ,1) ) { walk ( west ,1) } fi
 CORP
 {
 jumpTo (3 ,3) ;
-n := 6;
-putCB (2 ,1)
+walk ( south, 2)
 }
 GORP

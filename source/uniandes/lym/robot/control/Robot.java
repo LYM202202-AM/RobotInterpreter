@@ -305,19 +305,19 @@ public class Robot implements RobotConstants {
       {
         if (params.get(0) == "north")
         {
-          correctOr(0, false, sistema);
+          correctOr(0, sistema);
         }
         else if (params.get(0) == "south")
         {
-          correctOr(1, false, sistema);
+          correctOr(1, sistema);
         }
         else if (params.get(0) == "east")
         {
-          correctOr(2, false, sistema);
+          correctOr(2, sistema);
         }
         else if (params.get(0) == "west")
         {
-          correctOr(3, false, sistema);
+          correctOr(3, sistema);
         }
         break;
       }
@@ -374,6 +374,7 @@ public class Robot implements RobotConstants {
     }
     else if (params.size() == 2)
     {
+      System.out.println("Command: walk");
       ArrayList<String> dirParams = new ArrayList<String>();
       dirParams.add("front");
       dirParams.add("back");
@@ -388,100 +389,63 @@ public class Robot implements RobotConstants {
 
       if (dirParams.contains(params.get(0)))
       {
+        System.out.println("Command: walk con direccion" + params.get(0));
         if (params.get(0) == "front")
         {
           world.moveVertically(Integer.parseInt(params.get(1)), false);
-          salida = "Command: MoveVertically";
         }
         else if (params.get(0) == "back")
         {
-          world.moveVertically(Integer.parseInt(params.get(1))*-1, true);
-          salida = "Command: MoveVertically";
+          world.moveVertically(Integer.parseInt(params.get(1))*-1, false);
         }
         else if (params.get(0) == "left")
         {
-          world.moveHorizontally(Integer.parseInt(params.get(1))*-1, true);
-          salida = "Command: MoveHorizontally";
+          world.moveHorizontally(Integer.parseInt(params.get(1))*-1, false);
         }
         else if (params.get(0) == "right")
         {
           world.moveHorizontally(Integer.parseInt(params.get(1)), false);
-          salida = "Command: MoveHorizontally";
         }
+        salida = "Command: MoveHorizontally";
       }
       else if (orParams.contains(params.get(0)))
       {
+        // System.out.println("Command: walk con orientacion" + params.get(0));
         if (params.get(0) == "north")
         {
-          boolean correctOr = correctOr(0, false, sistema);
-          if (correctOr)
-          {
-            world.moveForward(Integer.parseInt(params.get(1)), false);
-            salida = "Command: MoveForward";
-          }
+          correctOr(0, sistema);
+          world.moveForward(Integer.parseInt(params.get(1)), false);
         }
-        else if (params.get(0) == "south")
+        else if (params.get(0).equals("south"))
         {
-          boolean correctOr = correctOr(1, false, sistema);
-          if (correctOr)
-          {
-            world.moveForward(Integer.parseInt(params.get(1)), true);
-            salida = "Command: MoveForward";
-          }
+          correctOr(1, sistema);
+          world.moveForward(Integer.parseInt(params.get(1)), false);
         }
         else if (params.get(0) == "east")
         {
-          boolean correctOr = correctOr(2, false, sistema);
-          if (correctOr)
-          {
-            world.moveForward(Integer.parseInt(params.get(1)), false);
-            salida = "Command: MoveForward";
-          }
+          correctOr(2, sistema);
+          world.moveForward(Integer.parseInt(params.get(1)), false);
         }
         else if (params.get(0) == "west")
         {
-          boolean correctOr = correctOr(3, false, sistema);
-          if (correctOr)
-          {
-            world.moveForward(Integer.parseInt(params.get(1)), true);
-            salida = "Command: MoveForward";
-          }
+          correctOr(3, sistema);
+          world.moveForward(Integer.parseInt(params.get(1)), false);
         }
+        salida = "Command: MoveForward\u005cn";
       }
     }
     sistema.printOutput(salida);
   }
 
-  final public boolean correctOr(int direction, boolean correct, Console sistema) throws ParseException {
-    String salida = new String();
-    if (correct)
+  final public void correctOr(int direction, Console sistema) throws ParseException {
+    int currentOr = world.getFacing();
+    boolean correctOr = (currentOr == direction);
+    while (!correctOr)
     {
-      {if (true) return correct;}
+      world.turnRight();
+      correctOr = (world.getFacing() == direction);
+      sistema.printOutput("Command: TurnRight\u005cn");
     }
-    else
-    {
-      if (world.getFacing() == direction)
-      {
-        correct = true;
-      }
-      else
-      {
-        world.turnRight();
-        salida = "Command: TurnRight";
-        if (direction < 3)
-        {
-          direction ++;
-        }
-        else
-        {
-          direction = 0;
-        }
-      }
-      correctOr(direction, correct, sistema);
-      sistema.printOutput(salida);
-      {if (true) return correct;}
-    }
-    throw new Error("Missing return statement in function");
   }
 
     // for (HashMap<String, ArrayList<String>> procMaps: procsList)
@@ -1210,7 +1174,7 @@ public class Robot implements RobotConstants {
     if (execute){
       System.out.println(walk + " " + params);
     } else {
-      params.add(p1.image);
+      params.add(0, p1.image);
       guardarInfo(walk, params, scope, estructura);
     }
   }
@@ -1515,6 +1479,11 @@ public class Robot implements RobotConstants {
     finally { jj_save(0, xla); }
   }
 
+  private boolean jj_3R_9() {
+    if (jj_scan_token(CONSTANT)) return true;
+    return false;
+  }
+
   private boolean jj_3R_8() {
     if (jj_scan_token(WORD)) return true;
     return false;
@@ -1538,11 +1507,6 @@ public class Robot implements RobotConstants {
 
   private boolean jj_3_1() {
     if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_9() {
-    if (jj_scan_token(CONSTANT)) return true;
     return false;
   }
 
