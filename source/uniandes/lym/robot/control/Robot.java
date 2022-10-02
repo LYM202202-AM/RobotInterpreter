@@ -233,8 +233,8 @@ public class Robot implements RobotConstants {
                 e.printStackTrace();
               }
             }
-            // condicionBoolWhile = evaluarCondicion(condicionKeyWhile, condicionValueWhile, sistema);
-            condicionBoolWhile = false;
+            condicionBoolWhile = evaluarCondicion(condicionKeyWhile, condicionValueWhile, sistema);
+            // condicionBoolWhile = false;
           }
           whiles++;
           break;
@@ -322,7 +322,205 @@ public class Robot implements RobotConstants {
   }
 
   final public boolean evaluarCondicion(String commandName, ArrayList<String> params, Console sistema) throws ParseException {
-    {if (true) return true;}
+    boolean condicionBool = false;
+    switch (commandName){
+      case "isfacing":
+      {
+        int orientation;
+        if (params.get(0) == "north")
+        {
+          condicionBool = world.facingNorth();
+        }
+        else if (params.get(0) == "south")
+        {
+          condicionBool = world.facingSouth();
+        }
+        else if (params.get(0) == "east")
+        {
+          condicionBool = world.facingEast();
+        }
+        else if (params.get(0) == "west")
+        {
+          condicionBool = world.facingWest();
+        }
+
+        break;
+      }
+
+      case "canWalk":
+      {
+        ArrayList<String> dirParams = new ArrayList<String>();
+        dirParams.add("front");
+        dirParams.add("back");
+        dirParams.add("left");
+        dirParams.add("right");
+
+        ArrayList<String> orParams = new ArrayList<String>();
+        orParams.add("north");
+        orParams.add("south");
+        orParams.add("east");
+        orParams.add("west");
+
+        String hacia = params.get(0);
+        int facingTo = world.getFacing();
+        Point p = world.getPosition();
+        Double x = p.getX();
+        Double y = p.getY();
+        Double newPos = 0.0;
+        Double n = Double.parseDouble(params.get(1));
+        int dir = -1;
+
+        if (dirParams.contains(hacia))
+        {
+
+          switch(facingTo)
+          {
+            case 0:
+            {
+              if (hacia.equals( "front"))
+              {
+                newPos = y + n;
+                dir = 0;
+              }
+              else if (hacia.equals( "back"))
+              {
+                newPos = y - n;
+                dir = 1;
+              }
+              else if (hacia.equals( "left"))
+              {
+                newPos = x - n;
+                dir = 3;
+              }
+              else if (hacia.equals( "right"))
+              {
+                newPos = x + n;
+                dir = 2;
+              }
+              break;
+            }
+
+            case 1:
+            {
+              if (hacia.equals( "front"))
+              {
+                newPos = y - n;
+                dir = 1;
+              }
+              else if (hacia.equals( "back"))
+              {
+                newPos = y + n;
+                dir = 0;
+              }
+              else if (hacia.equals( "left"))
+              {
+                newPos = x + n;
+                dir = 2;
+              }
+              else if (hacia.equals( "right"))
+              {
+                newPos = x - n;
+                dir = 3;
+              }
+              break;
+            }
+
+            case 2:
+            {
+              if (hacia.equals( "front"))
+              {
+                newPos = x + n;
+                dir = 2;
+              }
+              else if (hacia.equals( "back"))
+              {
+                newPos = x - n;
+                dir = 3;
+              }
+              else if (hacia.equals( "left"))
+              {
+                newPos = y + n;
+                dir = 0;
+              }
+              else if (hacia.equals( "right"))
+              {
+                newPos = y - n;
+                dir = 1;
+              }
+              break;
+            }
+
+            case 3:
+            {
+              if (hacia.equals( "front"))
+              {
+                newPos = x - n;
+                dir = 3;
+              }
+              else if (hacia.equals( "back"))
+              {
+                newPos = x + n;
+                dir = 2;
+              }
+              else if (hacia.equals( "left"))
+              {
+                newPos = y - n;
+                dir = 1;
+              }
+              else if (hacia.equals( "right"))
+              {
+                newPos = y + n;
+                dir = 0;
+              }
+              break;
+            }
+
+          }
+        }
+
+        else if (orParams.contains(hacia))
+
+        {
+
+          if (hacia.equals( "north"))
+          {
+            newPos = y + n;
+            dir = 0;
+          }
+          else if (hacia.equals( "south"))
+          {
+            newPos = y - n;
+            dir = 1;
+          }
+          else if (hacia.equals( "east"))
+          {
+            newPos = x + n;
+            dir = 2;
+          }
+          else if (hacia.equals( "west"))
+          {
+            newPos = x - n;
+            dir = 3;
+          }
+        }
+
+        int integerX = x.intValue();
+        int integerY = y.intValue();
+        int integerNewPos = newPos.intValue();
+
+
+        boolean retorno = world.blockedInRange(integerX, integerY, integerNewPos, dir);
+        break;
+      }
+
+      case "isValid":
+      {
+        condicionBool = isValidCommand(params.get(0), Integer.parseInt(params.get(1)), sistema);
+        break;
+      }
+
+    }
+    {if (true) return condicionBool;}
     throw new Error("Missing return statement in function");
   }
 
@@ -624,6 +822,73 @@ public class Robot implements RobotConstants {
         e.printStackTrace();
       }
     }
+  }
+
+/*
+
+ */
+  final public boolean isValidCommand(String command, int n, Console sistema) throws ParseException {
+    boolean valid = false;
+    Point p = world.getPosition();
+    Double x = p.getX();
+    Double y = p.getY();
+    Double newPos = 0.0;
+    switch (command) {
+      case "grab":
+        valid = world.countBalloons(world.getPosition()) >= n;
+        break;
+      case "pop":
+        valid = world.countBalloons(world.getPosition()) >= n;
+        break;
+      case "free":
+        valid = world.getMyBalloons() >= n;
+      case "drop":
+        valid = (n<world.freeSpacesForChips() && world.getMyChips() >= n);
+        break;
+      case "walk":
+      {
+        int dir = world.getFacing();
+        if (dir == 0)
+        {newPos = y + n;}
+        else if (dir == 1)
+        {newPos = y - n;}
+        else if (dir == 2)
+        {newPos = x + n;}
+        else if (dir == 3)
+        {newPos = x - n;}
+
+        int integerX = x.intValue();
+        int integerY = y.intValue();
+        int integerNewPos = newPos.intValue();
+
+        valid = world.blockedInRange(integerX, integerY, integerNewPos, dir);
+        break;
+      }
+
+      case "jump":
+      {
+        Point actP = world.getPosition();
+        Point newP = new Point(actP);
+        int dir = world.getFacing();
+        if (dir == 0)
+        {y = y + n;}
+        else if (dir == 1)
+        {y = y - n;}
+        else if (dir == 2)
+        {x = x + n;}
+        else if (dir == 3)
+        {x = x - n;}
+
+        newP.setLocation(x, y);
+
+        valid = world.isBlocked(newP);
+        break;
+      }
+      default:
+        break;
+    }
+    {if (true) return valid;}
+    throw new Error("Missing return statement in function");
   }
 
     // for (HashMap<String, ArrayList<String>> procMaps: procsList)
@@ -1657,11 +1922,6 @@ public class Robot implements RobotConstants {
     finally { jj_save(0, xla); }
   }
 
-  private boolean jj_3R_9() {
-    if (jj_scan_token(CONSTANT)) return true;
-    return false;
-  }
-
   private boolean jj_3R_8() {
     if (jj_scan_token(WORD)) return true;
     return false;
@@ -1685,6 +1945,11 @@ public class Robot implements RobotConstants {
 
   private boolean jj_3_1() {
     if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_9() {
+    if (jj_scan_token(CONSTANT)) return true;
     return false;
   }
 
