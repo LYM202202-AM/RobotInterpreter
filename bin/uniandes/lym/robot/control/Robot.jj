@@ -340,11 +340,23 @@ void ejecutarEnOrden(String procedimientoActual, HashMap<String, Integer> scopeL
             System.out.println(instruccion + " " + params);
             System.out.println("\n");
           } else {
-            checkParams(instruccion, params, scopeLocal);
-            commandExecution(instruccion, params, sistema);
-            // ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
+            System.out.println(varNames);
+            System.out.println(varValues);
+            for (int i = 0; i < params.size(); i++)
+            {
+              if (varValues.containsKey(params.get(i)))
+              {
+                params.set(i, varValues.get(params.get(i)));
+              } else if (scopeLocal.containsKey(params.get(i)))
+              {
+                params.set(i, Integer.toString(scopeLocal.get(params.get(i))));
+              }
+            }
             System.out.println(instruccion + " " + params);
             System.out.println("\n");
+            commandExecution(instruccion, params, sistema);
+            // ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
+            // System.out.println(instruccion + " " + params);
             // procExecution(instruccion, params, sistema);
           }
           proc++;
@@ -360,19 +372,6 @@ void ejecutarEnOrden(String procedimientoActual, HashMap<String, Integer> scopeL
   }
 }
 
-void checkParams(String instruccion, ArrayList<String> params, HashMap<String, Integer> scopeLocal):
-{}
-{
-  {
-    for (int i = 0; i < params.size(); i++) 
-    {
-      if (varValues.containsKey(params.get(i))) 
-      {
-        params.set(i, Integer.toString(scopeLocal.get(params.get(i))));
-      }
-    }
-  }
-}
 
 void commandExecution(String commandName, ArrayList<String> params, Console sistema):
 {}
@@ -383,6 +382,8 @@ void commandExecution(String commandName, ArrayList<String> params, Console sist
     {
       case "walk":
       {
+        System.out.println("Command: Walk");
+        System.out.println(params);
         walkExecution(params, sistema);
         break;
       }
@@ -390,14 +391,14 @@ void commandExecution(String commandName, ArrayList<String> params, Console sist
       case "jump":
       {
         world.moveForward(Integer.parseInt(params.get(0)), true);
-        salida = "Command: MoveForward";
+        salida = "Command: MoveForward\n";
         break;
       }
       
       case "jumpTo":
       {
         world.setPostion(Integer.parseInt(params.get(0)), Integer.parseInt(params.get(1)));
-        salida = "Command: SetPosition";
+        salida = "Command: SetPosition\n";
         break;
       }
 
@@ -406,20 +407,20 @@ void commandExecution(String commandName, ArrayList<String> params, Console sist
         if (params.get(0) == "right")
         {
           world.turnRight();
-          salida = "Command: TurnRight";
+          salida = "Command: TurnRight\n";
         }
         else if (params.get(0) == "left")
         {
           world.turnRight();
           world.turnRight();
-          salida = "Command: TurnRight \n Command: TurnRight";
+          salida = "Command: TurnRight \n Command: TurnRight\n";
         }
         else if (params.get(0) == "around")
         {
           world.turnRight();
           world.turnRight();
           world.turnRight();
-          salida = "Command: TurnRight\nCommand: TurnRight\nCommand: TurnRight";
+          salida = "Command: TurnRight\nCommand: TurnRight\nCommand: TurnRight\n";
         }        
         break;
       }
@@ -447,39 +448,40 @@ void commandExecution(String commandName, ArrayList<String> params, Console sist
 
       case "drop":
       {
-        if (params.size() == 1)
-        {
-          world.putChips(Integer.parseInt(params.get(0)));
-          salida = "Command: Put Chips";
-        }
+        // System.out.println("Command: Drop");
+        // System.out.println(params);
+        world.putChips(Integer.parseInt(params.get(0)));
+        salida = "Command: Put Chips\n";
         break;
       }
 
       case "grab":
       {
         world.grabBalloons(Integer.parseInt(params.get(0)));
-        salida = "Command: GrabBalloons";
+        salida = "Command: GrabBalloons\n";
         break;
       }
 
       case "get":
       {
         world.pickChips(Integer.parseInt(params.get(0)));
-        salida = "Command: PickChips";
+        salida = "Command: PickChips\n";
         break;
       }
 
       case "free":
       {
+        System.out.println("Command: Free");
+        System.out.println(params);
         world.putBalloons(Integer.parseInt(params.get(0)));
-        salida = "Command: putBalloons";
+        salida = "Command: putBalloons\n";
         break;
       }
 
       case "pop":
       {
         world.popBalloons(Integer.parseInt(params.get(0)));
-        salida = "Command: PopBalloons";
+        salida = "Command: PopBalloons\n";
         break;
       }
 

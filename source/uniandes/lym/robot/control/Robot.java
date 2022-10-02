@@ -222,11 +222,23 @@ public class Robot implements RobotConstants {
             System.out.println(instruccion + " " + params);
             System.out.println("\u005cn");
           } else {
-            checkParams(instruccion, params, scopeLocal);
-            commandExecution(instruccion, params, sistema);
-            // ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
+            System.out.println(varNames);
+            System.out.println(varValues);
+            for (int i = 0; i < params.size(); i++)
+            {
+              if (varValues.containsKey(params.get(i)))
+              {
+                params.set(i, varValues.get(params.get(i)));
+              } else if (scopeLocal.containsKey(params.get(i)))
+              {
+                params.set(i, Integer.toString(scopeLocal.get(params.get(i))));
+              }
+            }
             System.out.println(instruccion + " " + params);
             System.out.println("\u005cn");
+            commandExecution(instruccion, params, sistema);
+            // ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
+            // System.out.println(instruccion + " " + params);
             // procExecution(instruccion, params, sistema);
           }
           proc++;
@@ -240,22 +252,14 @@ public class Robot implements RobotConstants {
     System.out.println("\u005cn");
   }
 
-  final public void checkParams(String instruccion, ArrayList<String> params, HashMap<String, Integer> scopeLocal) throws ParseException {
-    for (int i = 0; i < params.size(); i++)
-    {
-      if (varValues.containsKey(params.get(i)))
-      {
-        params.set(i, Integer.toString(scopeLocal.get(params.get(i))));
-      }
-    }
-  }
-
   final public void commandExecution(String commandName, ArrayList<String> params, Console sistema) throws ParseException {
     String salida = "";
     switch(commandName)
     {
       case "walk":
       {
+        System.out.println("Command: Walk");
+        System.out.println(params);
         walkExecution(params, sistema);
         break;
       }
@@ -263,14 +267,14 @@ public class Robot implements RobotConstants {
       case "jump":
       {
         world.moveForward(Integer.parseInt(params.get(0)), true);
-        salida = "Command: MoveForward";
+        salida = "Command: MoveForward\u005cn";
         break;
       }
 
       case "jumpTo":
       {
         world.setPostion(Integer.parseInt(params.get(0)), Integer.parseInt(params.get(1)));
-        salida = "Command: SetPosition";
+        salida = "Command: SetPosition\u005cn";
         break;
       }
 
@@ -279,20 +283,20 @@ public class Robot implements RobotConstants {
         if (params.get(0) == "right")
         {
           world.turnRight();
-          salida = "Command: TurnRight";
+          salida = "Command: TurnRight\u005cn";
         }
         else if (params.get(0) == "left")
         {
           world.turnRight();
           world.turnRight();
-          salida = "Command: TurnRight \u005cn Command: TurnRight";
+          salida = "Command: TurnRight \u005cn Command: TurnRight\u005cn";
         }
         else if (params.get(0) == "around")
         {
           world.turnRight();
           world.turnRight();
           world.turnRight();
-          salida = "Command: TurnRight\u005cnCommand: TurnRight\u005cnCommand: TurnRight";
+          salida = "Command: TurnRight\u005cnCommand: TurnRight\u005cnCommand: TurnRight\u005cn";
         }
         break;
       }
@@ -320,39 +324,40 @@ public class Robot implements RobotConstants {
 
       case "drop":
       {
-        if (params.size() == 1)
-        {
-          world.putChips(Integer.parseInt(params.get(0)));
-          salida = "Command: Put Chips";
-        }
+        // System.out.println("Command: Drop");
+        // System.out.println(params);
+        world.putChips(Integer.parseInt(params.get(0)));
+        salida = "Command: Put Chips\u005cn";
         break;
       }
 
       case "grab":
       {
         world.grabBalloons(Integer.parseInt(params.get(0)));
-        salida = "Command: GrabBalloons";
+        salida = "Command: GrabBalloons\u005cn";
         break;
       }
 
       case "get":
       {
         world.pickChips(Integer.parseInt(params.get(0)));
-        salida = "Command: PickChips";
+        salida = "Command: PickChips\u005cn";
         break;
       }
 
       case "free":
       {
+        System.out.println("Command: Free");
+        System.out.println(params);
         world.putBalloons(Integer.parseInt(params.get(0)));
-        salida = "Command: putBalloons";
+        salida = "Command: putBalloons\u005cn";
         break;
       }
 
       case "pop":
       {
         world.popBalloons(Integer.parseInt(params.get(0)));
-        salida = "Command: PopBalloons";
+        salida = "Command: PopBalloons\u005cn";
         break;
       }
 
@@ -1510,11 +1515,6 @@ public class Robot implements RobotConstants {
     finally { jj_save(0, xla); }
   }
 
-  private boolean jj_3R_9() {
-    if (jj_scan_token(CONSTANT)) return true;
-    return false;
-  }
-
   private boolean jj_3R_8() {
     if (jj_scan_token(WORD)) return true;
     return false;
@@ -1538,6 +1538,11 @@ public class Robot implements RobotConstants {
 
   private boolean jj_3_1() {
     if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_9() {
+    if (jj_scan_token(CONSTANT)) return true;
     return false;
   }
 
