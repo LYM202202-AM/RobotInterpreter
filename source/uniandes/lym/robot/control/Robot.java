@@ -95,6 +95,15 @@ public class Robot implements RobotConstants {
   ArrayList<String> localScope = new ArrayList<String>();
   ArrayList<String> ordenLocal = new ArrayList<String>();
   Token t;
+  varNames.clear();
+  procNames.clear();
+  procParams.clear();
+  globalScope.clear();
+  procCommands.clear();
+  whileProcs.clear();
+  ifProcs.clear();
+  repeatProcs.clear();
+  orden.clear();
     t = jj_consume_token(PROG);
     ArrayList<HashMap<String, ArrayList<String>>> listaMapaComandos = new ArrayList<HashMap<String, ArrayList<String>>>();
     procCommands.put(t.image, listaMapaComandos);
@@ -236,6 +245,28 @@ public class Robot implements RobotConstants {
           String numeroDeRepeticiones = condicionRepeat.get("repeat").get(0);
           System.out.println("Veces: " + numeroDeRepeticiones);
           System.out.println("Comandos del repeat: " + comandosSinCondicionRepeat);
+          int veces;
+          if (scopeLocal.containsKey(numeroDeRepeticiones)){
+            veces = scopeLocal.get(numeroDeRepeticiones);
+          } else if (varValues.containsKey(numeroDeRepeticiones)){
+            veces = Integer.parseInt(varValues.get(numeroDeRepeticiones));
+          } else {
+            veces = Integer.parseInt(numeroDeRepeticiones);
+          }
+          for (int i = 0; i < veces; i++){
+            for (HashMap<String, ArrayList<String>> comando : comandosSinCondicionRepeat) {
+              String nombreComando = comando.keySet().iterator().next();
+              ArrayList<String> params = comando.get(nombreComando);
+              System.out.println("Ejecutando comando: " + nombreComando);
+              System.out.println("Con parametros: " + params);
+              commandExecution(nombreComando, params, sistema);
+              try {
+                Thread.sleep(1000);
+              } catch (InterruptedException e) {
+                e.printStackTrace();
+              }
+            }
+          }
           repeats++;
           break;
         default:

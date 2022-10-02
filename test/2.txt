@@ -18,8 +18,6 @@ if ( canWalk ( west ,1) ) { walk ( west ,1) } fi
 }
 CORP
 {
-jumpTo (3 ,3) ;
-goWest();
-walk (back,1)
+repeatTimes 3 {veer(right)} per
 }
 GORP
