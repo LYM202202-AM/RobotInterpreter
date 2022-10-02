@@ -336,9 +336,11 @@ void ejecutarEnOrden(String procedimientoActual, HashMap<String, Integer> scopeL
             ejecutarEnOrden(instruccion, scopeLocal, sistema);
             System.out.println("\n");
           } else if (varNames.contains(instruccion)) {
+            varValues.put(instruccion, params.get(0));
             System.out.println(instruccion + " " + params);
             System.out.println("\n");
           } else {
+            checkParams(instruccion, params, scopeLocal);
             commandExecution(instruccion, params, sistema);
             // ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
             System.out.println(instruccion + " " + params);
@@ -355,6 +357,20 @@ void ejecutarEnOrden(String procedimientoActual, HashMap<String, Integer> scopeL
     System.out.println(indices);
     System.out.println("\n");
 
+  }
+}
+
+void checkParams(String instruccion, ArrayList<String> params, HashMap<String, Integer> scopeLocal):
+{}
+{
+  {
+    for (int i = 0; i < params.size(); i++) 
+    {
+      if (varValues.containsKey(params.get(i))) 
+      {
+        params.set(i, Integer.toString(scopeLocal.get(params.get(i))));
+      }
+    }
   }
 }
 
@@ -441,17 +457,39 @@ void commandExecution(String commandName, ArrayList<String> params, Console sist
 
       case "grab":
       {
-        world.getChips(Integer.parseInt(params.get(0)));
-        salida = "Command: Grab Chips";
+        world.grabBalloons(Integer.parseInt(params.get(0)));
+        salida = "Command: GrabBalloons";
         break;
       }
+
+      case "get":
+      {
+        world.pickChips(Integer.parseInt(params.get(0)));
+        salida = "Command: PickChips";
+        break;
+      }
+
+      case "free":
+      {
+        world.putBalloons(Integer.parseInt(params.get(0)));
+        salida = "Command: putBalloons";
+        break;
+      }
+
+      case "pop":
+      {
+        world.popBalloons(Integer.parseInt(params.get(0)));
+        salida = "Command: PopBalloons";
+        break;
+      }
+
     }
     sistema.printOutput(salida);
   }
 }
 
 
-String walkExecution(ArrayList<String> params, Console sistema):
+void walkExecution(ArrayList<String> params, Console sistema):
 {}
 {
   {
@@ -546,6 +584,7 @@ boolean correctOr(int direction, boolean correct, Console sistema):
 {}
 {
   {
+    String salida = new String();
     if (correct)
     {
       return correct;
@@ -559,7 +598,7 @@ boolean correctOr(int direction, boolean correct, Console sistema):
       else
       {
         world.turnRight();
-        String salida = "Command: TurnRight";
+        salida = "Command: TurnRight";
         if (direction < 3)
         {
           direction ++;
@@ -569,7 +608,7 @@ boolean correctOr(int direction, boolean correct, Console sistema):
           direction = 0;
         }
       }
-      correctOr(direction, correct);
+      correctOr(direction, correct, sistema);
       sistema.printOutput(salida);
       return correct;
     }
