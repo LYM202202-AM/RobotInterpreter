@@ -295,7 +295,7 @@ public class Robot implements RobotConstants {
           }
           salida = "Command: TurnRight\u005cn";
         }
-        else if (params.get(0).equals("left"))
+        else if (params.get(0).equals("around"))
         {
           world.turnRight();
           try {
@@ -311,7 +311,7 @@ public class Robot implements RobotConstants {
           }
           salida = "Command: TurnRight \u005cn Command: TurnRight\u005cn";
         }
-        else if (params.get(0).equals("around"))
+        else if (params.get(0).equals("left"))
         {
           world.turnRight();
           try {

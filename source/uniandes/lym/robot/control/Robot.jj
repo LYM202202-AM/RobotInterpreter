@@ -419,7 +419,7 @@ void commandExecution(String commandName, ArrayList<String> params, Console sist
           }
           salida = "Command: TurnRight\n";
         }
-        else if (params.get(0).equals("left"))
+        else if (params.get(0).equals("around"))
         {
           world.turnRight();
           try {
@@ -435,7 +435,7 @@ void commandExecution(String commandName, ArrayList<String> params, Console sist
           }
           salida = "Command: TurnRight \n Command: TurnRight\n";
         }
-        else if (params.get(0).equals("around"))
+        else if (params.get(0).equals("left"))
         {
           world.turnRight();
           try {
