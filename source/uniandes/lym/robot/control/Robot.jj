@@ -558,32 +558,82 @@ void walkExecution(ArrayList<String> params, Console sistema):
         if (params.get(0).equals("front"))
         {
           world.moveForward(Integer.parseInt(params.get(1)), false);
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
         }
         else if (params.get(0).equals("back"))
         {
           world.turnRight();
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           sistema.printOutput("Command: TurnRight\n");
           world.turnRight();
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           sistema.printOutput("Command: TurnRight\n");
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           world.moveForward(Integer.parseInt(params.get(1)), false);
           correctOr(initFacing, sistema);
         }
         else if (params.get(0).equals("left"))
         {
           world.turnRight();
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           sistema.printOutput("Command: TurnRight\n");
           world.turnRight();
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           sistema.printOutput("Command: TurnRight\n");
           world.turnRight();
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           sistema.printOutput("Command: TurnRight\n");
           world.moveForward(Integer.parseInt(params.get(1)), false);
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           correctOr(initFacing, sistema);
         }
         else if (params.get(0).equals("right"))
         {
           world.turnRight();
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           sistema.printOutput("Command: TurnRight\n");
           world.moveForward(Integer.parseInt(params.get(1)), false);
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           correctOr(initFacing, sistema);
         }
         salida = "Command: MoveForward\n";

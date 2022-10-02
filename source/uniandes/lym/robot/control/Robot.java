@@ -429,32 +429,82 @@ public class Robot implements RobotConstants {
         if (params.get(0).equals("front"))
         {
           world.moveForward(Integer.parseInt(params.get(1)), false);
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
         }
         else if (params.get(0).equals("back"))
         {
           world.turnRight();
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           sistema.printOutput("Command: TurnRight\u005cn");
           world.turnRight();
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           sistema.printOutput("Command: TurnRight\u005cn");
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           world.moveForward(Integer.parseInt(params.get(1)), false);
           correctOr(initFacing, sistema);
         }
         else if (params.get(0).equals("left"))
         {
           world.turnRight();
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           sistema.printOutput("Command: TurnRight\u005cn");
           world.turnRight();
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           sistema.printOutput("Command: TurnRight\u005cn");
           world.turnRight();
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           sistema.printOutput("Command: TurnRight\u005cn");
           world.moveForward(Integer.parseInt(params.get(1)), false);
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           correctOr(initFacing, sistema);
         }
         else if (params.get(0).equals("right"))
         {
           world.turnRight();
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           sistema.printOutput("Command: TurnRight\u005cn");
           world.moveForward(Integer.parseInt(params.get(1)), false);
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           correctOr(initFacing, sistema);
         }
         salida = "Command: MoveForward\u005cn";
@@ -1538,11 +1588,6 @@ public class Robot implements RobotConstants {
     finally { jj_save(0, xla); }
   }
 
-  private boolean jj_3R_9() {
-    if (jj_scan_token(CONSTANT)) return true;
-    return false;
-  }
-
   private boolean jj_3R_8() {
     if (jj_scan_token(WORD)) return true;
     return false;
@@ -1566,6 +1611,11 @@ public class Robot implements RobotConstants {
 
   private boolean jj_3_1() {
     if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_9() {
+    if (jj_scan_token(CONSTANT)) return true;
     return false;
   }
 
