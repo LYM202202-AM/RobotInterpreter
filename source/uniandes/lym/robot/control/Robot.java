@@ -221,6 +221,7 @@ public class Robot implements RobotConstants {
             System.out.println(instruccion + " " + params);
             System.out.println("\u005cn");
           } else {
+            commandExecution(instruccion, params, sistema);
             // ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
             System.out.println(instruccion + " " + params);
             System.out.println("\u005cn");
@@ -237,41 +238,100 @@ public class Robot implements RobotConstants {
     System.out.println("\u005cn");
   }
 
-  final public void procExecution(String procName, ArrayList<String> params, Console sistema) throws ParseException {
-    for (HashMap<String, ArrayList<String>> proc : this.procCommands.get(procName))
-    {//HashCompleto
-      for (String key : proc.keySet())
-      {//Nombre del procedimiento o variable
-        System.out.println("--------------");
-        System.out.println(key);
-        System.out.println("\u005cn");
-        switch(key)
-        {
-          case "walk":
-          {
-            walkExecution(params);
-            salida = "lol";
-            break;
-          }
-          case "drop":
-          {
+  final public void commandExecution(String commandName, ArrayList<String> params, Console sistema) throws ParseException {
+    String salida = "";
+    switch(commandName)
+    {
+      case "walk":
+      {
+        walkExecution(params, sistema);
+        break;
+      }
 
-            if (params.size() == 1)
-            {
-              world.putChips(Integer.parseInt(params.get(0)));
-              salida = "Command: Drop" + params.get(0) + " chips";
-            }
-            break;
-          }
+      case "jump":
+      {
+        world.moveForward(Integer.parseInt(params.get(0)), true);
+        salida = "Command: MoveForward";
+        break;
+      }
+
+      case "jumpTo":
+      {
+        world.setPostion(Integer.parseInt(params.get(0)), Integer.parseInt(params.get(1)));
+        salida = "Command: SetPosition";
+        break;
+      }
+
+      case "veer":
+      {
+        if (params.get(0) == "right")
+        {
+          world.turnRight();
+          salida = "Command: TurnRight";
         }
+        else if (params.get(0) == "left")
+        {
+          world.turnRight();
+          world.turnRight();
+          salida = "Command: TurnRight \u005cn Command: TurnRight";
+        }
+        else if (params.get(0) == "around")
+        {
+          world.turnRight();
+          world.turnRight();
+          world.turnRight();
+          salida = "Command: TurnRight\u005cnCommand: TurnRight\u005cnCommand: TurnRight";
+        }
+        break;
+      }
+
+      case "look":
+      {
+        if (params.get(0) == "north")
+        {
+          correctOr(0, false, sistema);
+        }
+        else if (params.get(0) == "south")
+        {
+          correctOr(1, false, sistema);
+        }
+        else if (params.get(0) == "east")
+        {
+          correctOr(2, false, sistema);
+        }
+        else if (params.get(0) == "west")
+        {
+          correctOr(3, false, sistema);
+        }
+        break;
+      }
+
+      case "drop":
+      {
+        if (params.size() == 1)
+        {
+          world.putChips(Integer.parseInt(params.get(0)));
+          salida = "Command: Put Chips";
+        }
+        break;
+      }
+
+      case "grab":
+      {
+        world.getChips(Integer.parseInt(params.get(0)));
+        salida = "Command: Grab Chips";
+        break;
       }
     }
+    sistema.printOutput(salida);
   }
 
-  final public void walkExecution(ArrayList<String> params) throws ParseException {
+  final public String walkExecution(ArrayList<String> params, Console sistema) throws ParseException {
+    String salida = new String();
     if (params.size() == 1)
     {
       world.moveForward(Integer.parseInt(params.get(0)), false);
+      salida = "Command: MoveForward";
     }
     else if (params.size() == 2)
     {
@@ -291,19 +351,23 @@ public class Robot implements RobotConstants {
       {
         if (params.get(0) == "front")
         {
-          world.moveVertically(Integer.parseInt(params.get(0)), false);
+          world.moveVertically(Integer.parseInt(params.get(1)), false);
+          salida = "Command: MoveVertically";
         }
         else if (params.get(0) == "back")
         {
-          world.moveVertically(Integer.parseInt(params.get(0))*-1, true);
+          world.moveVertically(Integer.parseInt(params.get(1))*-1, true);
+          salida = "Command: MoveVertically";
         }
         else if (params.get(0) == "left")
         {
-          world.moveHorizontally(Integer.parseInt(params.get(0))*-1, true);
+          world.moveHorizontally(Integer.parseInt(params.get(1))*-1, true);
+          salida = "Command: MoveHorizontally";
         }
         else if (params.get(0) == "right")
         {
-          world.moveHorizontally(Integer.parseInt(params.get(0)), false);
+          world.moveHorizontally(Integer.parseInt(params.get(1)), false);
+          salida = "Command: MoveHorizontally";
         }
       }
       else if (orParams.contains(params.get(0)))
@@ -313,14 +377,43 @@ public class Robot implements RobotConstants {
           boolean correctOr = correctOr(0, false);
           if (correctOr)
           {
-            // world.moveForward();
+            world.moveForward(Integer.parseInt(params.get(1)), false);
+            salida = "Command: MoveForward";
+          }
+        }
+        else if (params.get(0) == "south")
+        {
+          boolean correctOr = correctOr(1, false);
+          if (correctOr)
+          {
+            world.moveForward(Integer.parseInt(params.get(1)), true);
+            salida = "Command: MoveForward";
+          }
+        }
+        else if (params.get(0) == "east")
+        {
+          boolean correctOr = correctOr(2, false);
+          if (correctOr)
+          {
+            world.moveForward(Integer.parseInt(params.get(1)), false);
+            salida = "Command: MoveForward";
+          }
+        }
+        else if (params.get(0) == "west")
+        {
+          boolean correctOr = correctOr(3, false);
+          if (correctOr)
+          {
+            world.moveForward(Integer.parseInt(params.get(1)), true);
+            salida = "Command: MoveForward";
           }
         }
       }
     }
+    sistema.printOutput(salida);
   }
 
-  final public boolean correctOr(int direction, boolean correct) throws ParseException {
+  final public boolean correctOr(int direction, boolean correct, Console sistema) throws ParseException {
     if (correct)
     {
       {if (true) return correct;}
@@ -334,6 +427,7 @@ public class Robot implements RobotConstants {
       else
       {
         world.turnRight();
+        String salida = "Command: TurnRight";
         if (direction < 3)
         {
           direction ++;
@@ -344,6 +438,7 @@ public class Robot implements RobotConstants {
         }
       }
       correctOr(direction, correct);
+      sistema.printOutput(salida);
       {if (true) return correct;}
     }
     throw new Error("Missing return statement in function");
@@ -1380,6 +1475,11 @@ public class Robot implements RobotConstants {
     finally { jj_save(0, xla); }
   }
 
+  private boolean jj_3_1() {
+    if (jj_3R_6()) return true;
+    return false;
+  }
+
   private boolean jj_3R_9() {
     if (jj_scan_token(CONSTANT)) return true;
     return false;
@@ -1403,11 +1503,6 @@ public class Robot implements RobotConstants {
   private boolean jj_3R_6() {
     if (jj_3R_7()) return true;
     if (jj_scan_token(ASSIGNMENT)) return true;
-    return false;
-  }
-
-  private boolean jj_3_1() {
-    if (jj_3R_6()) return true;
     return false;
   }
 

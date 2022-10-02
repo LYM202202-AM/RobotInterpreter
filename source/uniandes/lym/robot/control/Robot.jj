@@ -339,6 +339,7 @@ void ejecutarEnOrden(String procedimientoActual, HashMap<String, Integer> scopeL
             System.out.println(instruccion + " " + params);
             System.out.println("\n");
           } else {
+            commandExecution(instruccion, params, sistema);
             // ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
             System.out.println(instruccion + " " + params);
             System.out.println("\n");
@@ -357,48 +358,108 @@ void ejecutarEnOrden(String procedimientoActual, HashMap<String, Integer> scopeL
   }
 }
 
-void procExecution(String procName, ArrayList<String> params, Console sistema):
+void commandExecution(String commandName, ArrayList<String> params, Console sistema):
 {}
 {
   {
-    for (HashMap<String, ArrayList<String>> proc : this.procCommands.get(procName))
-    {//HashCompleto
-      for (String key : proc.keySet())
-      {//Nombre del procedimiento o variable
-        System.out.println("--------------");
-        System.out.println(key);
-        System.out.println("\n");
-        switch(key)
-        {
-          case "walk":
-          {
-            walkExecution(params);
-            salida = "lol";
-            break;
-          }
-          case "drop":
-          {
+    String salida = "";
+    switch(commandName)
+    {
+      case "walk":
+      {
+        walkExecution(params, sistema);
+        break;
+      }
 
-            if (params.size() == 1)
-            {
-              world.putChips(Integer.parseInt(params.get(0)));
-              salida = "Command: Drop" + params.get(0) + " chips";
-            }
-            break;
-          }
+      case "jump":
+      {
+        world.moveForward(Integer.parseInt(params.get(0)), true);
+        salida = "Command: MoveForward";
+        break;
+      }
+      
+      case "jumpTo":
+      {
+        world.setPostion(Integer.parseInt(params.get(0)), Integer.parseInt(params.get(1)));
+        salida = "Command: SetPosition";
+        break;
+      }
+
+      case "veer":
+      {
+        if (params.get(0) == "right")
+        {
+          world.turnRight();
+          salida = "Command: TurnRight";
         }
+        else if (params.get(0) == "left")
+        {
+          world.turnRight();
+          world.turnRight();
+          salida = "Command: TurnRight \n Command: TurnRight";
+        }
+        else if (params.get(0) == "around")
+        {
+          world.turnRight();
+          world.turnRight();
+          world.turnRight();
+          salida = "Command: TurnRight\nCommand: TurnRight\nCommand: TurnRight";
+        }        
+        break;
+      }
+
+      case "look":
+      {
+        if (params.get(0) == "north")
+        {
+          correctOr(0, false, sistema);
+        }
+        else if (params.get(0) == "south")
+        {
+          correctOr(1, false, sistema);
+        }
+        else if (params.get(0) == "east")
+        {
+          correctOr(2, false, sistema);
+        }
+        else if (params.get(0) == "west")
+        {
+          correctOr(3, false, sistema);
+        }
+        break;
+      }
+
+      case "drop":
+      {
+        if (params.size() == 1)
+        {
+          world.putChips(Integer.parseInt(params.get(0)));
+          salida = "Command: Put Chips";
+        }
+        break;
+      }
+
+      case "grab":
+      {
+        world.getChips(Integer.parseInt(params.get(0)));
+        salida = "Command: Grab Chips";
+        break;
       }
     }
+    sistema.printOutput(salida);
   }
 }
 
-void walkExecution(ArrayList<String> params):
+
+String walkExecution(ArrayList<String> params, Console sistema):
 {}
 {
   {
+    String salida = new String();
     if (params.size() == 1)
     {
       world.moveForward(Integer.parseInt(params.get(0)), false);
+      salida = "Command: MoveForward";
     }
     else if (params.size() == 2)
     {
@@ -418,37 +479,70 @@ void walkExecution(ArrayList<String> params):
       {
         if (params.get(0) == "front")
         {
-          world.moveVertically(Integer.parseInt(params.get(0)), false);
+          world.moveVertically(Integer.parseInt(params.get(1)), false);
+          salida = "Command: MoveVertically";
         } 
         else if (params.get(0) == "back")
         {
-          world.moveVertically(Integer.parseInt(params.get(0))*-1, true);
+          world.moveVertically(Integer.parseInt(params.get(1))*-1, true);
+          salida = "Command: MoveVertically";
         }
         else if (params.get(0) == "left")
         {
-          world.moveHorizontally(Integer.parseInt(params.get(0))*-1, true);
+          world.moveHorizontally(Integer.parseInt(params.get(1))*-1, true);
+          salida = "Command: MoveHorizontally";
         }
         else if (params.get(0) == "right")
         {
-          world.moveHorizontally(Integer.parseInt(params.get(0)), false);
+          world.moveHorizontally(Integer.parseInt(params.get(1)), false);
+          salida = "Command: MoveHorizontally";
         }
       }
       else if (orParams.contains(params.get(0)))
       {
         if (params.get(0) == "north")
         {
-          boolean correctOr = correctOr(0, false);
+          boolean correctOr = correctOr(0, false, sistema);
           if (correctOr)
           {
-            // world.moveForward();
+            world.moveForward(Integer.parseInt(params.get(1)), false);
+            salida = "Command: MoveForward";
+          }
+        }
+        else if (params.get(0) == "south")
+        {
+          boolean correctOr = correctOr(1, false, sistema);
+          if (correctOr)
+          {
+            world.moveForward(Integer.parseInt(params.get(1)), true);
+            salida = "Command: MoveForward";
+          }
+        }
+        else if (params.get(0) == "east")
+        {
+          boolean correctOr = correctOr(2, false, sistema);
+          if (correctOr)
+          {
+            world.moveForward(Integer.parseInt(params.get(1)), false);
+            salida = "Command: MoveForward";
+          }
+        }
+        else if (params.get(0) == "west")
+        {
+          boolean correctOr = correctOr(3, false, sistema);
+          if (correctOr)
+          {
+            world.moveForward(Integer.parseInt(params.get(1)), true);
+            salida = "Command: MoveForward";
           }
         }
       }
     }
+    sistema.printOutput(salida);
   }
 }
 
-boolean correctOr(int direction, boolean correct):
+boolean correctOr(int direction, boolean correct, Console sistema):
 {}
 {
   {
@@ -465,6 +559,7 @@ boolean correctOr(int direction, boolean correct):
       else
       {
         world.turnRight();
+        String salida = "Command: TurnRight";
         if (direction < 3)
         {
           direction ++;
@@ -475,6 +570,7 @@ boolean correctOr(int direction, boolean correct):
         }
       }
       correctOr(direction, correct);
+      sistema.printOutput(salida);
       return correct;
     }
   }
