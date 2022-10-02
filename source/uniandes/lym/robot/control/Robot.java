@@ -131,27 +131,7 @@ public class Robot implements RobotConstants {
     ejecutarEnOrden(procedimientoActual,scopeLocal ,sistema);
 
 
-    // for (HashMap<String, ArrayList<String>> proc : this.procCo mmands.get("PROG")) 
-    // {//HashCompleto
-    //   for (String key : proc.keySet()) 
-    //   {//Nombre del procedimiento o variable
-    //     System.out.println("--------------");
-    //     System.out.println(key); 
-    //     ArrayList<String> parametros = proc.get(key);
-    //     if (this.procNames.contains(key))
-    //       {
-    //         System.out.println(key);
-    //         System.out.println(parametros);
-    //         procExecution(key, parametros, sistema);
 
-    //       }
-    //       else if (this.varNames.contains(key))
-    //       {
-    //         //Cosas de variables 
-    //         this.varValues.put(key, parametros.get(0));
-    //       }
-    //     }
-    //   }
     {if (true) return false;}
     throw new Error("Missing return statement in function");
   }
@@ -183,6 +163,23 @@ public class Robot implements RobotConstants {
           System.out.println("Comandos del if: " + comandosSinCondicion);
           System.out.println("Comandos del else: " + comandosDelElse);
 
+          boolean hasElse = true;
+          if (comandosDelElse == null){
+            hasElse = false;
+          }
+          String condicionKey = condicion.keySet().toArray()[0].toString();
+          ArrayList<String> condicionValue = condicion.get(condicionKey);
+          boolean condicionBool = evaluarCondicion(condicionKey, condicionValue, sistema);
+          if (condicionBool){
+            for (HashMap<String, ArrayList<String>> comando : comandosSinCondicion) {
+              String nombreComando = comando.keySet().iterator().next();
+              ArrayList<String> params = comando.get(nombreComando);
+              System.out.println("Ejecutando comando: " + nombreComando);
+              System.out.println("Con parametros: " + params);
+              commandExecution(nombreComando, params, sistema);
+            }
+
+          }
           ifs++;
           break;
         case "while":
@@ -242,9 +239,6 @@ public class Robot implements RobotConstants {
             } catch (InterruptedException e) {
               e.printStackTrace();
             }
-            // ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
-            // System.out.println(instruccion + " " + params);
-            // procExecution(instruccion, params, sistema);
           }
           proc++;
           break;
@@ -255,6 +249,11 @@ public class Robot implements RobotConstants {
     String indices = proc + " " + ifs + " " + whiles + " " + repeats;
     System.out.println(indices);
     System.out.println("\u005cn");
+  }
+
+  final public boolean evaluarCondicion(String commandName, ArrayList<String> params, Console sistema) throws ParseException {
+    {if (true) return true;}
+    throw new Error("Missing return statement in function");
   }
 
   final public void commandExecution(String commandName, ArrayList<String> params, Console sistema) throws ParseException {
@@ -1588,21 +1587,6 @@ public class Robot implements RobotConstants {
     finally { jj_save(0, xla); }
   }
 
-  private boolean jj_3R_8() {
-    if (jj_scan_token(WORD)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_7() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_8()) {
-    jj_scanpos = xsp;
-    if (jj_3R_9()) return true;
-    }
-    return false;
-  }
-
   private boolean jj_3R_6() {
     if (jj_3R_7()) return true;
     if (jj_scan_token(ASSIGNMENT)) return true;
@@ -1616,6 +1600,21 @@ public class Robot implements RobotConstants {
 
   private boolean jj_3R_9() {
     if (jj_scan_token(CONSTANT)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_8() {
+    if (jj_scan_token(WORD)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_7() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_8()) {
+    jj_scanpos = xsp;
+    if (jj_3R_9()) return true;
+    }
     return false;
   }
 

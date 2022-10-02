@@ -19,10 +19,7 @@ if ( canWalk ( west ,1) ) { walk ( west ,1) } fi
 CORP
 {
 jumpTo (3 ,3) ;
-walk ( south, 2);
-walk (front, 1);
-walk(left, 1);
-walk (right, 1);
+goWest();
 walk (back,1)
 }
 GORP

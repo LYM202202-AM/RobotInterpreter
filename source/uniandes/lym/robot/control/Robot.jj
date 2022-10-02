@@ -246,27 +246,7 @@ boolean command(Console sistema):
     ejecutarEnOrden(procedimientoActual,scopeLocal ,sistema);
 
 
-    // for (HashMap<String, ArrayList<String>> proc : this.procCo mmands.get("PROG")) 
-    // {//HashCompleto
-    //   for (String key : proc.keySet()) 
-    //   {//Nombre del procedimiento o variable
-    //     System.out.println("--------------");
-    //     System.out.println(key); 
-    //     ArrayList<String> parametros = proc.get(key);
-    //     if (this.procNames.contains(key))
-    //       {
-    //         System.out.println(key);
-    //         System.out.println(parametros);
-    //         procExecution(key, parametros, sistema);
-            
-    //       }
-    //       else if (this.varNames.contains(key))
-    //       {
-    //         //Cosas de variables 
-    //         this.varValues.put(key, parametros.get(0));
-    //       }
-    //     }
-    //   }
+
     return false;
     }
   }
@@ -301,6 +281,30 @@ void ejecutarEnOrden(String procedimientoActual, HashMap<String, Integer> scopeL
           System.out.println("Comandos del if: " + comandosSinCondicion);
           System.out.println("Comandos del else: " + comandosDelElse);
           
+          boolean hasElse = true;
+          if (comandosDelElse == null){
+            hasElse = false;
+          }
+          String condicionKey = condicion.keySet().toArray()[0].toString();
+          ArrayList<String> condicionValue = condicion.get(condicionKey);
+          boolean condicionBool = evaluarCondicion(condicionKey, condicionValue, sistema);
+          if (condicionBool){
+            for (HashMap<String, ArrayList<String>> comando : comandosSinCondicion) {
+              String nombreComando = comando.keySet().iterator().next();
+              ArrayList<String> params = comando.get(nombreComando);
+              System.out.println("Ejecutando comando: " + nombreComando);
+              System.out.println("Con parametros: " + params);
+              commandExecution(nombreComando, params, sistema);
+            } else if (hasElse){
+              for (HashMap<String, ArrayList<String>> comando : comandosDelElse) {
+                String nombreComando = comando.keySet().iterator().next();
+                ArrayList<String> params = comando.get(nombreComando);
+                System.out.println("Ejecutando comando: " + nombreComando);
+                System.out.println("Con parametros: " + params);
+                commandExecution(nombreComando, params, sistema);
+              }
+            }
+          }
           ifs++;
           break;
         case "while":
@@ -360,9 +364,6 @@ void ejecutarEnOrden(String procedimientoActual, HashMap<String, Integer> scopeL
             } catch (InterruptedException e) {
               e.printStackTrace();
             }
-            // ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
-            // System.out.println(instruccion + " " + params);
-            // procExecution(instruccion, params, sistema);
           }
           proc++;
           break;
@@ -374,6 +375,14 @@ void ejecutarEnOrden(String procedimientoActual, HashMap<String, Integer> scopeL
     System.out.println(indices);
     System.out.println("\n");
 
+  }
+}
+
+boolean evaluarCondicion(String commandName, ArrayList<String> params, Console sistema):
+{}
+{
+  {
+    return true;
   }
 }
 
