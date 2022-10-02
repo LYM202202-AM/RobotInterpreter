@@ -349,6 +349,7 @@ public class Robot implements RobotConstants {
 
       case "canWalk":
       {
+        System.out.println("canWalk");
         ArrayList<String> dirParams = new ArrayList<String>();
         dirParams.add("front");
         dirParams.add("back");
@@ -369,6 +370,8 @@ public class Robot implements RobotConstants {
         Double newPos = 0.0;
         Double n = Double.parseDouble(params.get(1));
         int dir = -1;
+        System.out.println(params);
+        System.out.println(facingTo);
 
         if (dirParams.contains(hacia))
         {
@@ -481,15 +484,17 @@ public class Robot implements RobotConstants {
         else if (orParams.contains(hacia))
 
         {
+          System.out.println("orParams");
 
           if (hacia.equals( "north"))
           {
-            newPos = y + n;
+            newPos = y - n;
             dir = 0;
           }
           else if (hacia.equals( "south"))
           {
-            newPos = y - n;
+            System.out.println("south");
+            newPos = y + n;
             dir = 1;
           }
           else if (hacia.equals( "east"))
@@ -508,8 +513,11 @@ public class Robot implements RobotConstants {
         int integerY = y.intValue();
         int integerNewPos = newPos.intValue();
 
+        System.out.println("integerX: " + integerX);
+        System.out.println("integerY: " + integerY);
+        System.out.println("integerNewPos: " + integerNewPos);
 
-        boolean retorno = world.blockedInRange(integerX, integerY, integerNewPos, dir);
+        condicionBool = !world.blockedInRange(integerX, integerY, integerNewPos, dir) && integerNewPos > 0 && integerNewPos <= world.getN();
         break;
       }
 
@@ -1922,6 +1930,11 @@ public class Robot implements RobotConstants {
     finally { jj_save(0, xla); }
   }
 
+  private boolean jj_3R_9() {
+    if (jj_scan_token(CONSTANT)) return true;
+    return false;
+  }
+
   private boolean jj_3R_8() {
     if (jj_scan_token(WORD)) return true;
     return false;
@@ -1945,11 +1958,6 @@ public class Robot implements RobotConstants {
 
   private boolean jj_3_1() {
     if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_9() {
-    if (jj_scan_token(CONSTANT)) return true;
     return false;
   }
 
