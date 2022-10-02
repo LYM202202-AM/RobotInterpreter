@@ -177,9 +177,26 @@ public class Robot implements RobotConstants {
               System.out.println("Ejecutando comando: " + nombreComando);
               System.out.println("Con parametros: " + params);
               commandExecution(nombreComando, params, sistema);
+              try {
+                Thread.sleep(1000);
+              } catch (InterruptedException e) {
+                e.printStackTrace();
+              }
             }
-
-          }
+          } else if (hasElse){
+              for (HashMap<String, ArrayList<String>> comando : comandosDelElse) {
+                String nombreComando = comando.keySet().iterator().next();
+                ArrayList<String> params = comando.get(nombreComando);
+                System.out.println("Ejecutando comando: " + nombreComando);
+                System.out.println("Con parametros: " + params);
+                commandExecution(nombreComando, params, sistema);
+                try {
+                  Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                  e.printStackTrace();
+                }
+              }
+            }
           ifs++;
           break;
         case "while":
@@ -188,6 +205,28 @@ public class Robot implements RobotConstants {
           List <HashMap<String, ArrayList<String>>> comandosSinCondicionWhile = comandosDelWhile.subList(1, comandosDelWhile.size());
           System.out.println("Condicion del while: " + condicionWhile);
           System.out.println("Comandos del while: " + comandosSinCondicionWhile);
+          String condicionKeyWhile = condicionWhile.keySet().toArray()[0].toString();
+          System.out.println("Condicion key while: " + condicionKeyWhile);
+          ArrayList<String> condicionValueWhile = condicionWhile.get(condicionKeyWhile);
+          boolean condicionBoolWhile = evaluarCondicion(condicionKeyWhile, condicionValueWhile, sistema);
+          System.out.println("Condicion del while: " + condicionBoolWhile);
+          while (condicionBoolWhile){
+            System.out.println("Ejecutando comandos del while");
+            for (HashMap<String, ArrayList<String>> comando : comandosSinCondicionWhile) {
+              String nombreComando = comando.keySet().iterator().next();
+              ArrayList<String> params = comando.get(nombreComando);
+              System.out.println("Ejecutando comando: " + nombreComando);
+              System.out.println("Con parametros: " + params);
+              commandExecution(nombreComando, params, sistema);
+              try {
+                Thread.sleep(1000);
+              } catch (InterruptedException e) {
+                e.printStackTrace();
+              }
+            }
+            // condicionBoolWhile = evaluarCondicion(condicionKeyWhile, condicionValueWhile, sistema);
+            condicionBoolWhile = false;
+          }
           whiles++;
           break;
         case "repeat":
@@ -1587,17 +1626,6 @@ public class Robot implements RobotConstants {
     finally { jj_save(0, xla); }
   }
 
-  private boolean jj_3R_6() {
-    if (jj_3R_7()) return true;
-    if (jj_scan_token(ASSIGNMENT)) return true;
-    return false;
-  }
-
-  private boolean jj_3_1() {
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
   private boolean jj_3R_9() {
     if (jj_scan_token(CONSTANT)) return true;
     return false;
@@ -1615,6 +1643,17 @@ public class Robot implements RobotConstants {
     jj_scanpos = xsp;
     if (jj_3R_9()) return true;
     }
+    return false;
+  }
+
+  private boolean jj_3R_6() {
+    if (jj_3R_7()) return true;
+    if (jj_scan_token(ASSIGNMENT)) return true;
+    return false;
+  }
+
+  private boolean jj_3_1() {
+    if (jj_3R_6()) return true;
     return false;
   }
 

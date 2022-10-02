@@ -295,9 +295,26 @@ void ejecutarEnOrden(String procedimientoActual, HashMap<String, Integer> scopeL
               System.out.println("Ejecutando comando: " + nombreComando);
               System.out.println("Con parametros: " + params);
               commandExecution(nombreComando, params, sistema);
+              try {
+                Thread.sleep(1000);
+              } catch (InterruptedException e) {
+                e.printStackTrace();
+              }
             }
-
-          }
+          } else if (hasElse){
+              for (HashMap<String, ArrayList<String>> comando : comandosDelElse) {
+                String nombreComando = comando.keySet().iterator().next();
+                ArrayList<String> params = comando.get(nombreComando);
+                System.out.println("Ejecutando comando: " + nombreComando);
+                System.out.println("Con parametros: " + params);
+                commandExecution(nombreComando, params, sistema);
+                try {
+                  Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                  e.printStackTrace();
+                }
+              }
+            }
           ifs++;
           break;
         case "while":
@@ -306,6 +323,28 @@ void ejecutarEnOrden(String procedimientoActual, HashMap<String, Integer> scopeL
           List <HashMap<String, ArrayList<String>>> comandosSinCondicionWhile = comandosDelWhile.subList(1, comandosDelWhile.size());
           System.out.println("Condicion del while: " + condicionWhile);
           System.out.println("Comandos del while: " + comandosSinCondicionWhile);
+          String condicionKeyWhile = condicionWhile.keySet().toArray()[0].toString();
+          System.out.println("Condicion key while: " + condicionKeyWhile);
+          ArrayList<String> condicionValueWhile = condicionWhile.get(condicionKeyWhile);
+          boolean condicionBoolWhile = evaluarCondicion(condicionKeyWhile, condicionValueWhile, sistema);
+          System.out.println("Condicion del while: " + condicionBoolWhile);
+          while (condicionBoolWhile){
+            System.out.println("Ejecutando comandos del while");
+            for (HashMap<String, ArrayList<String>> comando : comandosSinCondicionWhile) {
+              String nombreComando = comando.keySet().iterator().next();
+              ArrayList<String> params = comando.get(nombreComando);
+              System.out.println("Ejecutando comando: " + nombreComando);
+              System.out.println("Con parametros: " + params);
+              commandExecution(nombreComando, params, sistema);
+              try {
+                Thread.sleep(1000);
+              } catch (InterruptedException e) {
+                e.printStackTrace();
+              }
+            }
+            // condicionBoolWhile = evaluarCondicion(condicionKeyWhile, condicionValueWhile, sistema);
+            condicionBoolWhile = false;
+          }
           whiles++;
           break;
         case "repeat":
