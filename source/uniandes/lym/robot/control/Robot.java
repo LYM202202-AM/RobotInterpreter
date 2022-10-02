@@ -323,6 +323,14 @@ public class Robot implements RobotConstants {
 
   final public boolean evaluarCondicion(String commandName, ArrayList<String> params, Console sistema) throws ParseException {
     boolean condicionBool = false;
+    boolean negacion = false;
+    if (commandName.startsWith("not")){
+      commandName = commandName.substring(3);
+      negacion = true;
+
+    }
+    System.out.println("Condicion: " + commandName);
+    System.out.println(negacion);
     switch (commandName){
       case "isfacing":
       {
@@ -527,6 +535,11 @@ public class Robot implements RobotConstants {
         break;
       }
 
+    }
+    if (negacion)
+    {
+      System.out.println("negacion");
+      {if (true) return !condicionBool;}
     }
     {if (true) return condicionBool;}
     throw new Error("Missing return statement in function");
@@ -1930,11 +1943,6 @@ public class Robot implements RobotConstants {
     finally { jj_save(0, xla); }
   }
 
-  private boolean jj_3R_9() {
-    if (jj_scan_token(CONSTANT)) return true;
-    return false;
-  }
-
   private boolean jj_3R_8() {
     if (jj_scan_token(WORD)) return true;
     return false;
@@ -1958,6 +1966,11 @@ public class Robot implements RobotConstants {
 
   private boolean jj_3_1() {
     if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_9() {
+    if (jj_scan_token(CONSTANT)) return true;
     return false;
   }
 

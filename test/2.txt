@@ -29,7 +29,7 @@ while ( canWalk ( east ,1) ) do { walk ( east ,1) } od
 CORP
 {
 goSouth();
-goEast():
+goEast();
 goNorth();
 goWest()
 
