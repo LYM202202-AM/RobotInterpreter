@@ -351,8 +351,8 @@ void ejecutarEnOrden(String procedimientoActual, HashMap<String, Integer> scopeL
                 e.printStackTrace();
               }
             }
-            // condicionBoolWhile = evaluarCondicion(condicionKeyWhile, condicionValueWhile, sistema);
-            condicionBoolWhile = false;
+            condicionBoolWhile = evaluarCondicion(condicionKeyWhile, condicionValueWhile, sistema);
+            // condicionBoolWhile = false;
           }
           whiles++;
           break;
