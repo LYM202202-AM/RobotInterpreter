@@ -355,6 +355,11 @@ void ejecutarEnOrden(String procedimientoActual, HashMap<String, Integer> scopeL
             System.out.println(instruccion + " " + params);
             System.out.println("\n");
             commandExecution(instruccion, params, sistema);
+            try {
+              Thread.sleep(1000);
+            } catch (InterruptedException e) {
+              e.printStackTrace();
+            }
             // ArrayList<String> params = procCommands.get(procedimientoActual).get(proc).get(instruccion);
             // System.out.println(instruccion + " " + params);
             // procExecution(instruccion, params, sistema);
@@ -404,22 +409,52 @@ void commandExecution(String commandName, ArrayList<String> params, Console sist
 
       case "veer":
       {
-        if (params.get(0) == "right")
+        if (params.get(0).equals("right"))
         {
           world.turnRight();
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           salida = "Command: TurnRight\n";
         }
-        else if (params.get(0) == "left")
+        else if (params.get(0).equals("left"))
         {
           world.turnRight();
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           world.turnRight();
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           salida = "Command: TurnRight \n Command: TurnRight\n";
         }
-        else if (params.get(0) == "around")
+        else if (params.get(0).equals("around"))
         {
           world.turnRight();
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           world.turnRight();
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           world.turnRight();
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           salida = "Command: TurnRight\nCommand: TurnRight\nCommand: TurnRight\n";
         }        
         break;
@@ -427,19 +462,19 @@ void commandExecution(String commandName, ArrayList<String> params, Console sist
 
       case "look":
       {
-        if (params.get(0) == "north")
+        if (params.get(0).equals("north"))
         {
           correctOr(0, sistema);
         }
-        else if (params.get(0) == "south")
+        else if (params.get(0).equals("south"))
         {
           correctOr(1, sistema);
         }
-        else if (params.get(0) == "east")
+        else if (params.get(0).equals("east"))
         {
           correctOr(2, sistema);
         }
-        else if (params.get(0) == "west")
+        else if (params.get(0).equals("west"))
         {
           correctOr(3, sistema);
         }
@@ -519,28 +554,44 @@ void walkExecution(ArrayList<String> params, Console sistema):
       if (dirParams.contains(params.get(0)))
       {
         System.out.println("Command: walk con direccion" + params.get(0));
-        if (params.get(0) == "front")
+        int initFacing = world.getFacing();
+        if (params.get(0).equals("front"))
         {
-          world.moveVertically(Integer.parseInt(params.get(1)), false);
-        } 
-        else if (params.get(0) == "back")
-        {
-          world.moveVertically(Integer.parseInt(params.get(1))*-1, false);
+          world.moveForward(Integer.parseInt(params.get(1)), false);
         }
-        else if (params.get(0) == "left")
+        else if (params.get(0).equals("back"))
         {
-          world.moveHorizontally(Integer.parseInt(params.get(1))*-1, false);
+          world.turnRight();
+          sistema.printOutput("Command: TurnRight\n");
+          world.turnRight();
+          sistema.printOutput("Command: TurnRight\n");
+          world.moveForward(Integer.parseInt(params.get(1)), false);
+          correctOr(initFacing, sistema);
         }
-        else if (params.get(0) == "right")
+        else if (params.get(0).equals("left"))
         {
-          world.moveHorizontally(Integer.parseInt(params.get(1)), false);
+          world.turnRight();
+          sistema.printOutput("Command: TurnRight\n");
+          world.turnRight();
+          sistema.printOutput("Command: TurnRight\n");
+          world.turnRight();
+          sistema.printOutput("Command: TurnRight\n");
+          world.moveForward(Integer.parseInt(params.get(1)), false);
+          correctOr(initFacing, sistema);
         }
-        salida = "Command: MoveHorizontally";
+        else if (params.get(0).equals("right"))
+        {
+          world.turnRight();
+          sistema.printOutput("Command: TurnRight\n");
+          world.moveForward(Integer.parseInt(params.get(1)), false);
+          correctOr(initFacing, sistema);
+        }
+        salida = "Command: MoveForward\n";
       }
       else if (orParams.contains(params.get(0)))
       {
         // System.out.println("Command: walk con orientacion" + params.get(0));
-        if (params.get(0) == "north")
+        if (params.get(0).equals("north"))
         {
           correctOr(0, sistema);
           world.moveForward(Integer.parseInt(params.get(1)), false);
@@ -550,12 +601,12 @@ void walkExecution(ArrayList<String> params, Console sistema):
           correctOr(1, sistema);
           world.moveForward(Integer.parseInt(params.get(1)), false);
         }
-        else if (params.get(0) == "east")
+        else if (params.get(0).equals("east"))
         {
           correctOr(2, sistema);
           world.moveForward(Integer.parseInt(params.get(1)), false);
         }
-        else if (params.get(0) == "west")
+        else if (params.get(0).equals("west"))
         {
           correctOr(3, sistema);
           world.moveForward(Integer.parseInt(params.get(1)), false);
@@ -566,6 +617,9 @@ void walkExecution(ArrayList<String> params, Console sistema):
     sistema.printOutput(salida);
   }
 }
+
+
+
 
 void correctOr(int direction, Console sistema):
 {}
@@ -578,6 +632,14 @@ void correctOr(int direction, Console sistema):
       world.turnRight();
       correctOr = (world.getFacing() == direction);
       sistema.printOutput("Command: TurnRight\n");
+      try
+      {
+        Thread.sleep(1000);
+      }
+      catch (InterruptedException e)
+      {
+        e.printStackTrace();
+      }
     }
   }
 }
